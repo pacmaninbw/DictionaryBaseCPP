@@ -1,3 +1,4 @@
+#include "AbstractDictionary.h"
 #include "ColumnDictionary.h"
 #include "columnidenum.h"
 #include <iostream>
@@ -5,12 +6,115 @@
 #include "TableDictionary.h"
 #include <vector>
 
+/*
+ * Testing the basic implementation.
+ */
+enum class BaseTestEnum
+{
+    BASETEST_INVALID,
+    BASETEST_1,
+    BASETEST_2,
+    BASETEST_3,
+    BASETEST_LAST
+};
+
+class BaseTestClass : public DictionaryBase<BaseTestEnum, std::string>
+{
+public:
+    BaseTestClass()
+    {
+        addDefinition(BaseTestEnum::BASETEST_1, "Base Test 1");    
+        addDefinition(BaseTestEnum::BASETEST_2, "Base Test 2");    
+        addDefinition(BaseTestEnum::BASETEST_3, "Base Test 3");    
+    }
+    ~BaseTestClass() = default;
+    bool noOverRidesNeed() noexcept override { return true; }
+};
+
+static bool BaseTestIdToName(BaseTestEnum input, std::string expectedOutput)
+{
+    BaseTestClass underTest;
+    std::string actualOutPut = underTest.getNames(input);
+
+    if (!expectedOutput.compare(actualOutPut) == 0)
+    {
+        std::cerr << "\tBase ID to Name Test Failed " << expectedOutput << "\n";
+        return false;
+    }
+
+    return true;
+}
+
+static bool BaseTestNameToID(std::string input, BaseTestEnum expectedOutput)
+{
+    BaseTestClass underTest;
+    BaseTestEnum actualOutPut = underTest.getIds(input);
+
+    if (expectedOutput != actualOutPut)
+    {
+        std::cerr << "\tBase Name to ID Test Failed " << input << "\n";
+        return false;
+    }
+
+    return true;
+}
+
+static bool basicTestIdsDictionary()
+{
+    bool testPassed = true;
+    std::cout << "\nTesting base implementation\n";
+
+
+    if (!BaseTestIdToName(BaseTestEnum::BASETEST_1, "Base Test 1"))
+    {
+        return false;
+    }
+
+    if (!BaseTestIdToName(BaseTestEnum::BASETEST_2, "Base Test 2"))
+    {
+        return false;
+    }
+
+    if (!BaseTestIdToName(BaseTestEnum::BASETEST_3, "Base Test 3"))
+    {
+        return false;
+    }
+
+    if (!BaseTestNameToID("Base Test 1", BaseTestEnum::BASETEST_1))
+    {
+        return false;
+    }
+
+    if (!BaseTestNameToID("Base Test 2", BaseTestEnum::BASETEST_2))
+    {
+        return false;
+    }
+
+    if (!BaseTestNameToID("Base Test 3", BaseTestEnum::BASETEST_3))
+    {
+        return false;
+    }
+
+    // Negative Test Path
+    if (!BaseTestIdToName(static_cast<BaseTestEnum>(217), ""))
+    {
+        return false;
+    }
+    if (!BaseTestNameToID("Name Not Found", BaseTestEnum::BASETEST_INVALID))
+    {
+        return false;
+    }
+
+    return testPassed;
+}
+
+/*
+ * Testing TableDictionary class which adds some extenstions to the base clase.
+ */
 static bool TableTestIdToName(TableIds input, std::pair<std::string, std::string>  expectedOutput)
 {
     TableDictionary underTest;
     std::pair<std::string, std::string> actualOutPut(underTest.getNames(input));
-
-    std::cout << "actualOutPut " << actualOutPut.first << " " << actualOutPut.second << "\n";
 
     if (expectedOutput.first.compare(actualOutPut.first) != 0 || 
             expectedOutput.second.compare(actualOutPut.second) != 0)
@@ -43,7 +147,7 @@ static bool TableTestNameToID(std::string input, TableIds expectedOutput)
 
     if (expectedOutput != actualOutPut)
     {
-        std::cerr << "\tSingl eTable Name to ID Test Failed " << input << "\n";
+        std::cerr << "\tSingle Table Name to ID Test Failed " << input << "\n";
         return false;
     }
 
@@ -113,6 +217,9 @@ static bool testTableIdsDictionary()
     return testPassed;
 }
 
+/*
+ * Testing the ColumnDictionary class, which just uses the base class.
+ */
 static bool ColumnTestIdToName(ColumnIds input, std::string expectedOutput)
 {
     ColumnDictionary underTest;
@@ -209,6 +316,11 @@ static bool testColumnIdsDictionary()
 int main()
 {
     int exitStatus = EXIT_SUCCESS;
+
+    if (!basicTestIdsDictionary())
+    {
+        exitStatus = EXIT_FAILURE;
+    }
 
     if (!testColumnIdsDictionary())
     {
