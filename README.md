@@ -18,3 +18,4 @@ The DictionaryBase class should be portable to all systems and all C++ compilers
 - CMake
 - gcc 12
 - Ubuntu 22.04
+- Visual Studio Code (vscode)
