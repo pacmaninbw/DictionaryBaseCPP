@@ -19,3 +19,6 @@ The DictionaryBase class should be portable to all systems and all C++ compilers
 - gcc 12
 - Ubuntu 22.04
 - Visual Studio Code (vscode)
+
+# Status
+This code was reviewed on the [Stack Exchange Code Review site](https://codereview.stackexchange.com/questions/293782/generic-c-class-to-associate-enum-values-with-strings-for-translation). The code reviewed in that review can be found in the `PreCodeReview` branch. Development is continuing in the `master` branch. 
