@@ -6,9 +6,12 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(TestDictionary
-    src/TestDictionary.cpp
-    src/ColumnDictionary.cpp
-    src/TableDictionary.cpp
+    src/tests/TestDictionary.cpp
+    src/tests/ColumnDictionary.cpp
+    src/tests/TableDictionary.cpp
+    src/tests/TestColumnDictionary.cpp
+    src/tests/TestTableDictionary.cpp
+    src/tests/TestGenericDictionary.cpp
     )
 
 target_compile_features(TestDictionary PUBLIC cxx_std_20)
