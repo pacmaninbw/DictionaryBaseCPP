@@ -1,0 +1,262 @@
+#include <exception>
+#include "../include/GenericDictionary.h"
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include "TestGenericDictionary.h"
+#include <vector>
+
+TestGenericDictionary::TestGenericDictionary()
+{
+
+}
+
+bool TestGenericDictionary::executeTests() noexcept
+{
+    bool allTestsPassed = true;
+
+    std::cout << "Testing the GenericDictionary class\n";
+    try
+    {
+        if (!testContructorPositivePath())
+        {
+            allTestsPassed = false;
+        }
+        if (!testConstructorMissingIDDef())
+        {
+            allTestsPassed = false;
+        }
+        if (!testConstructorDuplicateID())
+        {
+            allTestsPassed = false;
+        }
+        if (!testConstructorDuplicateName())
+        {
+            allTestsPassed = false;
+        }
+    }
+    catch (const std::logic_error &le)
+    {
+        std::cerr << "TestGenericDictionary::executeTests() UNCAUGHT logic_error: " <<
+            le.what() << "\n\n";
+        return false;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "TestGenericDictionary::executeTests() UNCAUGHT UNKNOWN EXCEPTION: " <<
+            e.what() << "\n\n";
+        return false;
+    }
+    
+    if (allTestsPassed)
+    {
+        std::cout << "Testing the GenericDictionary class: ALL TESTS PASSED!\n";
+    }
+    else
+    {
+        std::cerr << "Testing the GenericDictionary class: SOME OR ALL TESTS FAILED!\n";
+    }
+
+    return allTestsPassed;
+}
+
+/*
+ * GD for GenericDictionary
+ */
+static std::vector<std::string> positiveGDTestStrings = 
+{
+    "", // For GDPOSITIVE_INVALID_VALUE
+    "Test String 1", // For GDPOSITIVE_TEST_VALUE_1
+    "Test String 2", // For GDPOSITIVE_TEST_VALUE_2
+    "Test String 3", // For GDPOSITIVE_TEST_VALUE_3
+    "Test String 4", // For GDPOSITIVE_TEST_VALUE_4
+    "Test String 5", // For GDPOSITIVE_TEST_VALUE_5
+    "Test String 6", // For GDPOSITIVE_TEST_VALUE_6
+    "" // For GDPOSITIVE_LAST_ENUM
+};
+
+static std::vector<TestPairs> testData =
+{
+    {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_1, positiveGDTestStrings[1]},
+    {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_2, positiveGDTestStrings[2]},
+    {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_3, positiveGDTestStrings[3]},
+    {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_4, positiveGDTestStrings[4]},
+    {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_5, positiveGDTestStrings[5]},
+    {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_6, positiveGDTestStrings[6]},
+};
+
+/*
+ * Basic Positive Path test of the GenericDictionary class. If the constructor
+ * does not throw an exception continue testing the default implementation of
+ * the public methods.S
+*/
+bool TestGenericDictionary::testContructorPositivePath() noexcept
+{
+    bool testPassed = true;
+
+    try
+    {
+        std::cout << "GenericDictionary Constructor Positive Path Test\n";
+
+        GenericDictionary <GDPositivePathEnum, std::string> underTest(
+            GDPositivePathEnum::GDPOSITIVE_INVALID_VALUE,
+            GDPositivePathEnum::GDPOSITIVE_LAST_ENUM,
+            {
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_1, positiveGDTestStrings[1]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_2, positiveGDTestStrings[2]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_3, positiveGDTestStrings[3]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_4, positiveGDTestStrings[4]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_5, positiveGDTestStrings[5]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_6, positiveGDTestStrings[6]}
+            }
+        );
+        
+        std::cout << "\tTest GenericDictionary Constructor Positive Path No exception thrown PASSED\n";
+
+        if ((testPassed = testIdToNameLoop(underTest, testData)))
+        {
+            testPassed = testNameToIDLoop(underTest, testData);
+        }
+    }
+    catch (const std::logic_error &le)
+    {
+        std::cerr << "TestGenericDictionary::testContructorPositivePath() logic_error: " <<
+            le.what() << "\n\n";
+        testPassed = false;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "TestGenericDictionary::testContructorPositivePath() UNKNOWN EXCEPTION: " <<
+            e.what() << "\n\n";
+        testPassed = false;
+    }
+    
+    std::cout << "GenericDictionary Constructor Positive Path Test " <<
+        (testPassed? "PASSED\n\n": "FAILED\n\n");
+
+    return testPassed;
+}
+
+/*
+ * If the constructor is missing an ID definition, the constructor is expected
+ * to throw a std::logic_error exception.
+ */
+bool TestGenericDictionary::testConstructorMissingIDDef() noexcept
+{
+    try
+    {
+        std::cout << "GenericDictionary Constructor Negative Path Test: Missing ID enum\n";
+        
+        // GDPOSITIVE_TEST_VALUE_3 removed from constructor
+        GenericDictionary <GDPositivePathEnum, std::string> expectedFailure(
+            GDPositivePathEnum::GDPOSITIVE_INVALID_VALUE,
+            GDPositivePathEnum::GDPOSITIVE_LAST_ENUM,
+            {
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_1, positiveGDTestStrings[1]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_2, positiveGDTestStrings[2]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_4, positiveGDTestStrings[4]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_5, positiveGDTestStrings[5]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_6, positiveGDTestStrings[6]}
+            }
+        );
+    }
+    catch (const std::logic_error &le)
+    {
+        std::cerr << "GenericDictionary Constructor threw expected std::logic_error: " << le.what() << "\n";
+        std::cout << "\tGenericDictionary Constructor Negative Path Test: Missing ID enum: PASSED\n\n";
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "TestGenericDictionary::testContructorPositivePath() UNKNOWN EXCEPTION: " <<
+            e.what() << "\n\n";
+        return false;
+    }
+    
+    std::cerr << "GenericDictionary Constructor Negative Path Test: Missing ID enum: FAILED\n\n";
+
+    return false;
+}
+
+bool TestGenericDictionary::testConstructorDuplicateID() noexcept
+{
+    return false;
+}
+
+bool TestGenericDictionary::testConstructorDuplicateName() noexcept
+{
+    return false;
+}
+
+bool TestGenericDictionary::testIdToName(
+    GenericDictionary<GDPositivePathEnum, std::string> &underTest,
+    GDPositivePathEnum testId, 
+    std::string &expectedOutput
+) noexcept
+{
+    std::string testGetName = underTest.getNames(testId);
+    if (testGetName.compare(expectedOutput) != 0)
+    {
+        std::cerr
+            << "\tTest GenericDictionary Constructor Positive Path get Name from ID FAILED: Input Value " <<
+            static_cast<std::size_t>(testId) << " Expected Output " << expectedOutput << "\n";
+            ;
+        return false;
+    }
+
+    return true;
+}
+
+bool TestGenericDictionary::testIdToNameLoop(
+    GenericDictionary<GDPositivePathEnum, std::string> &underTest,
+    std::vector<TestPairs> &testData
+) noexcept
+{
+    for (auto testInput: testData)
+    {
+        if (!testIdToName(underTest, testInput.testID, testInput.testName))
+        {
+            return false;
+        }
+    }
+    
+    std::cout << "\tTest GenericDictionary Constructor Positive Path get Name from ID PASSED\n";
+
+    return true;
+}
+
+bool TestGenericDictionary::testNameToId(
+    GenericDictionary<GDPositivePathEnum, std::string> &underTest,
+    std::string testName,
+    GDPositivePathEnum expectedOutput
+) noexcept
+{
+    GDPositivePathEnum testGetID = underTest.getIds(testName);
+    if (testGetID != expectedOutput)
+    {
+        std::cerr <<
+            "\tTest GenericDictionary Constructor Positive Path get ID from Name FAILED: "
+            << "Input Name: " << testName
+            << " Expected Output: " << static_cast<std::size_t>(expectedOutput)
+            << " Actual Output: " << static_cast<std::size_t>(testGetID)
+            << "\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool TestGenericDictionary::testNameToIDLoop(GenericDictionary<GDPositivePathEnum, std::string> &underTest, std::vector<TestPairs> &testData) noexcept
+{
+    for (auto testInput: testData)
+    {
+        if (!testNameToId(underTest,  testInput.testName, testInput.testID))
+        {
+            return false;
+        }
+    }
+    
+    std::cout << "\tTest GenericDictionary Constructor Positive Path get ID from Nmea PASSED\n";
+
+    return true;
+}
