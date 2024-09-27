@@ -30,8 +30,8 @@ public:
 
 		using std::chrono::system_clock;
 		auto const now = system_clock::to_time_t(system_clock::now());
-		std::clog << "finished " << whatIsBeingTimed << std::put_time(std::localtime(&now), "%c")
-			  << "\nelapsed time in seconds: " << ElapsedTimeForOutPut << "\n\n\n";
+		std::clog << ">>>> Finished " << whatIsBeingTimed << std::put_time(std::localtime(&now), "%c")
+			  << "\n>>>> Elapsed time in seconds: " << ElapsedTimeForOutPut << "\n\n\n";
 	}
 
 private:

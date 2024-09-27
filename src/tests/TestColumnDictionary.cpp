@@ -1,6 +1,7 @@
 #include <iostream>
 #include "ColumnDictionary.h"
 #include "TestColumnDictionary.h"
+#include "UtilityTimer.h"
 
 /*
  * Testing the ColumnDictionary class, which just uses the base class.
@@ -41,40 +42,147 @@ TestColumnDictionary::TestColumnDictionary()
 bool TestColumnDictionary::executeTests() noexcept
 {
     bool allTestsPassed = true;
+    UtilityTimer testTimer;
+
+    std::cout << "\nTesting ColumnDictionary\n";
+    testTimer.startTimer();
+    allTestsPassed = executeCommonGDTests();
+    testTimer.stopTimerAndReport("Execute Commom ColumnDictionary Test ");
+
+
+    if (allTestsPassed)
+    {
+        testTimer.startTimer();
+        allTestsPassed = executeStandAloneTests();
+        testTimer.stopTimerAndReport("Execute Stand Alone ColumnDictionary Test ");
+    }
+
+    if (allTestsPassed)
+    {
+        std::cout << "\tAll Column Dictionary Tests Passed\n";
+    }
+    else
+    {
+        std::cout << "\tSome or all Column Dictionary Tests FAILED\n";
+    }
+
+    return allTestsPassed;
+}
+
+/*
+ * Each stand alone test creates a local copy of a ColumnDictionary
+ */
+bool TestColumnDictionary::executeStandAloneTests() noexcept
+{
+    bool allTestsPassed = true;
 
     std::cout << "\nTesting ColumnDictionary\n";
 
     for (auto testCandidate: positiveColumnTestData)
     {
-        if (!testIdToName(testCandidate.testId, testCandidate.testName))
+        if (!standAloneIdToName(testCandidate.testId, testCandidate.testName))
         {
             return false;
         }
-        if (!testNameToID(testCandidate.testName, testCandidate.testId))
+        if (!standAloneNameToID(testCandidate.testName, testCandidate.testId))
         {
             return false;
         }
     }
 
-    std::cout << "\tAll Positive Path Tests Passed\n";
+    std::cout << "\tAll Stand Alone Positive Path Tests Passed\n";
 
     // Negative Test Path
-    if (!testIdToName(static_cast<ColumnIds>(217), ""))
+    if (!standAloneIdToName(static_cast<ColumnIds>(217), ""))
     {
-        std::cout << "Negative Path Tests for ID to Name FAILED\n";
+        std::cout << "Stand Alone Negative Path Tests for ID to Name FAILED\n";
         return false;
     }
-    if (!testNameToID("Name Not Found", ColumnIds::NO_COLUMN))
+    if (!standAloneNameToID("Name Not Found", ColumnIds::NO_COLUMN))
     {
-        std::cout << "Negative Path Tests for Name to ID FAILED\n";
+        std::cout << "Stand Alone Negative Path Tests for Name to ID FAILED\n";
         return false;
     }
-    std::cout << "\tAll Negative Path Tests Passed\n";
+    std::cout << "\tAll Stand Alone Negative Path Tests Passed\n";
 
     return allTestsPassed;
 }
 
-bool TestColumnDictionary::testIdToName(ColumnIds input, std::string expectedOutput) noexcept
+bool TestColumnDictionary::executeCommonGDTests() noexcept
+{
+    bool allTestsPassed = true;
+    std::cout << "\nTesting Common Dictionary ColumnDictionary\n";
+    try
+    {
+        ColumnDictionary underTest;
+
+        for (auto testCandidate: positiveColumnTestData)
+        {
+            if (!commonGDIdToName(underTest, testCandidate.testId, testCandidate.testName))
+            {
+                return false;
+            }
+            if (!commonGDNameToID(underTest, testCandidate.testName, testCandidate.testId))
+            {
+                return false;
+            }
+        }
+        std::cout << "\tAll Common ColumnDictionary Positive Path Tests Passed\n";
+
+        // Negative Test Path
+        if (!commonGDIdToName(underTest, static_cast<ColumnIds>(217), ""))
+        {
+            std::cout << "\tCommon ColumnDictionary Negative Path Tests for ID to Name FAILED\n";
+            return false;
+        }
+        if (!commonGDNameToID(underTest, "Name Not Found", ColumnIds::NO_COLUMN))
+        {
+            std::cout << "\tCommon ColumnDictionary  Negative Path Tests for Name to ID FAILED\n";
+            return false;
+        }
+        std::cout << "\tAll Common ColumnDictionary Negative Path Tests Passed\n";
+    }
+    catch (const std::logic_error &le)
+    {
+        std::cerr << "TestColumnDictionary::executeCommonGDTests() logic_error: " << le.what() << "\n\n";
+        return false;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "TestColumnDictionary::executeCommonGDTests() UNEXPECTED EXCEPTION: " << e.what() << '\n';
+        return false;
+    }
+
+    return allTestsPassed;
+}
+
+bool TestColumnDictionary::commonGDIdToName(ColumnDictionary &underTest, ColumnIds input, std::string expectedOutput) noexcept
+{
+    std::string actualOutPut = underTest.getNames(input);
+
+    if (!expectedOutput.compare(actualOutPut) == 0)
+    {
+        std::cerr << "Common Dictionary Column ID to Name Test Failed " << expectedOutput << "\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool TestColumnDictionary::commonGDNameToID(ColumnDictionary &underTest, std::string input, ColumnIds expectedOutput) noexcept
+{
+    ColumnIds actualOutPut = underTest.getIds(input);
+
+    if (expectedOutput != actualOutPut)
+    {
+        std::cerr << "\tColumn Name to ID Test Failed " << input << "\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool TestColumnDictionary::standAloneIdToName(ColumnIds input, std::string expectedOutput) noexcept
 {
     try
     {
@@ -89,19 +197,19 @@ bool TestColumnDictionary::testIdToName(ColumnIds input, std::string expectedOut
     }
     catch (const std::logic_error &le)
     {
-        std::cerr << "TestColumnDictionary::testIdToName() logic_error: " << le.what() << "\n\n";
+        std::cerr << "TestColumnDictionary::standAloneIdToName() logic_error: " << le.what() << "\n\n";
         return false;
     }
     catch(const std::exception& e)
     {
-        std::cerr << "TestColumnDictionary::testIdToName() UNEXPECTED EXCEPTION: " << e.what() << '\n';
+        std::cerr << "TestColumnDictionary::standAloneIdToName() UNEXPECTED EXCEPTION: " << e.what() << '\n';
         return false;
     }
     
     return true;
 }
 
-bool TestColumnDictionary::testNameToID(std::string input, ColumnIds expectedOutput) noexcept
+bool TestColumnDictionary::standAloneNameToID(std::string input, ColumnIds expectedOutput) noexcept
 {
     try
     {
@@ -116,12 +224,12 @@ bool TestColumnDictionary::testNameToID(std::string input, ColumnIds expectedOut
     }
     catch (const std::logic_error &le)
     {
-        std::cerr << "TestColumnDictionary::testNameToID() logic_error: " << le.what() << "\n\n";
+        std::cerr << "TestColumnDictionary::standAloneNameToID() logic_error: " << le.what() << "\n\n";
         return false;
     }
     catch(const std::exception& e)
     {
-        std::cerr << "TestColumnDictionary::testNameToID() UNEXPECTED EXCEPTION: " << e.what() << '\n';
+        std::cerr << "TestColumnDictionary::standAloneNameToID() UNEXPECTED EXCEPTION: " << e.what() << '\n';
         return false;
     }    
 

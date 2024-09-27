@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include "TestGenericDictionary.h"
+#include "UtilityTimer.h"
 #include <vector>
 
 TestGenericDictionary::TestGenericDictionary()
@@ -14,26 +15,38 @@ TestGenericDictionary::TestGenericDictionary()
 bool TestGenericDictionary::executeTests() noexcept
 {
     bool allTestsPassed = true;
+    UtilityTimer testTimer;
 
     std::cout << "Testing the GenericDictionary class\n";
     try
     {
+        testTimer.startTimer();
         if (!testContructorPositivePath())
         {
             allTestsPassed = false;
         }
+        testTimer.stopTimerAndReport("Positive Path Constructor Test ");
+
+        testTimer.startTimer();
         if (!testConstructorMissingIDDef())
         {
             allTestsPassed = false;
         }
+        testTimer.stopTimerAndReport("Negative Path Constructor Test: Missing ID Enum ");
+
+        testTimer.startTimer();
         if (!testConstructorDuplicateID())
         {
             allTestsPassed = false;
         }
+        testTimer.stopTimerAndReport("Negative Path Constructor Test: Duplicate ID Enum ");
+
+        testTimer.startTimer();
         if (!testConstructorDuplicateName())
         {
             allTestsPassed = false;
         }
+        testTimer.stopTimerAndReport("Negative Path Constructor Test: Duplicate Name string ");
     }
     catch (const std::logic_error &le)
     {
@@ -180,11 +193,77 @@ bool TestGenericDictionary::testConstructorMissingIDDef() noexcept
 
 bool TestGenericDictionary::testConstructorDuplicateID() noexcept
 {
+    try
+    {
+        std::cout << "GenericDictionary Constructor Negative Path Test: Duplicate ID enum\n";
+        
+        // GDPOSITIVE_TEST_VALUE_2 is duplicated
+        GenericDictionary <GDPositivePathEnum, std::string> expectedFailure(
+            GDPositivePathEnum::GDPOSITIVE_INVALID_VALUE,
+            GDPositivePathEnum::GDPOSITIVE_LAST_ENUM,
+            {
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_1, positiveGDTestStrings[1]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_2, positiveGDTestStrings[2]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_3, positiveGDTestStrings[3]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_4, positiveGDTestStrings[4]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_2, positiveGDTestStrings[2]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_6, positiveGDTestStrings[6]}
+            }
+        );
+    }
+    catch (const std::logic_error &le)
+    {
+        std::cerr << "GenericDictionary Constructor threw expected std::logic_error: " << le.what() << "\n";
+        std::cout << "\tGenericDictionary Constructor Negative Path Test: Duplicate ID enum: PASSED\n\n";
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "TestGenericDictionary::testContructorPositivePath() UNKNOWN EXCEPTION: " <<
+            e.what() << "\n\n";
+        return false;
+    }
+    
+    std::cerr << "GenericDictionary Constructor Negative Path Test: Duplicate ID enum: FAILED\n\n";
+
     return false;
 }
 
 bool TestGenericDictionary::testConstructorDuplicateName() noexcept
 {
+    try
+    {
+        std::cout << "GenericDictionary Constructor Negative Path Test: Duplicate Name string\n";
+        
+        // positiveGDTestStrings[2] is duplicated
+        GenericDictionary <GDPositivePathEnum, std::string> expectedFailure(
+            GDPositivePathEnum::GDPOSITIVE_INVALID_VALUE,
+            GDPositivePathEnum::GDPOSITIVE_LAST_ENUM,
+            {
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_1, positiveGDTestStrings[1]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_2, positiveGDTestStrings[2]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_3, positiveGDTestStrings[3]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_4, positiveGDTestStrings[4]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_5, positiveGDTestStrings[2]},
+                {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_6, positiveGDTestStrings[6]}
+            }
+        );
+    }
+    catch (const std::logic_error &le)
+    {
+        std::cerr << "GenericDictionary Constructor threw expected std::logic_error: " << le.what() << "\n";
+        std::cout << "\tGenericDictionary Constructor Negative Path Test: Duplicate Name string: PASSED\n\n";
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "TestGenericDictionary::testContructorPositivePath() UNKNOWN EXCEPTION: " <<
+            e.what() << "\n\n";
+        return false;
+    }
+    
+    std::cerr << "GenericDictionary Constructor Negative Path Test: Duplicate Name string: FAILED\n\n";
+
     return false;
 }
 
@@ -198,8 +277,10 @@ bool TestGenericDictionary::testIdToName(
     if (testGetName.compare(expectedOutput) != 0)
     {
         std::cerr
-            << "\tTest GenericDictionary Constructor Positive Path get Name from ID FAILED: Input Value " <<
-            static_cast<std::size_t>(testId) << " Expected Output " << expectedOutput << "\n";
+            << "\tTest GenericDictionary get Name from ID FAILED: Input Value " <<
+            static_cast<std::size_t>(testId)
+            << " Expected Output " << expectedOutput << " " 
+            << " Actual Ouput " << testGetName << "\n";
             ;
         return false;
     }
@@ -220,7 +301,7 @@ bool TestGenericDictionary::testIdToNameLoop(
         }
     }
     
-    std::cout << "\tTest GenericDictionary Constructor Positive Path get Name from ID PASSED\n";
+    std::cout << "\tTest GenericDictionary get Name from ID PASSED\n";
 
     return true;
 }
@@ -235,7 +316,7 @@ bool TestGenericDictionary::testNameToId(
     if (testGetID != expectedOutput)
     {
         std::cerr <<
-            "\tTest GenericDictionary Constructor Positive Path get ID from Name FAILED: "
+            "\tTest GenericDictionary get ID from Name FAILED: "
             << "Input Name: " << testName
             << " Expected Output: " << static_cast<std::size_t>(expectedOutput)
             << " Actual Output: " << static_cast<std::size_t>(testGetID)
@@ -256,7 +337,8 @@ bool TestGenericDictionary::testNameToIDLoop(GenericDictionary<GDPositivePathEnu
         }
     }
     
-    std::cout << "\tTest GenericDictionary Constructor Positive Path get ID from Nmea PASSED\n";
+    std::cout << "\tTest GenericDictionary get ID from Name PASSED\n";
 
     return true;
 }
+

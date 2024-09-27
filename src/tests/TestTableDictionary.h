@@ -12,17 +12,25 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+class TableDictionary;
+
 class TestTableDictionary
 {
 public:
     TestTableDictionary();
     ~TestTableDictionary() = default;
     bool executeTests() noexcept;
+    bool executeStandAloneTests() noexcept;
+    bool executeCommonGDTests() noexcept;
 
 private:
-    bool testNamesToID(std::pair<std::string, std::string> input, TableIds expectedOutput) noexcept;
-    bool testNameToID(std::string input, TableIds expectedOutput) noexcept; 
-    bool testIdToName(TableIds input, std::pair<std::string, std::string>  expectedOutput) noexcept;
+    bool commonGDTestNamesToID(TableDictionary &underTest, std::pair<std::string, std::string> input, TableIds expectedOutput) noexcept;
+    bool commonGDTestNameToID(TableDictionary &underTest, std::string input, TableIds expectedOutput) noexcept; 
+    bool commonGDTestIdToName(TableDictionary &underTest, TableIds input, std::pair<std::string, std::string>  expectedOutput) noexcept;
+    bool standAloneTestNamesToID(std::pair<std::string, std::string> input, TableIds expectedOutput) noexcept;
+    bool standAloneTestNameToID(std::string input, TableIds expectedOutput) noexcept; 
+    bool standAloneTestIdToName(TableIds input, std::pair<std::string, std::string>  expectedOutput) noexcept;
     typedef struct TableIDTestData
     {
         TableIds testID;

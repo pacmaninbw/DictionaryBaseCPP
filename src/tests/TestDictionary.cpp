@@ -17,10 +17,6 @@ int main()
         {
             exitStatus = EXIT_FAILURE;
         }
-        else
-        {
-            std::cout << "\t Base Test passed";
-        }
 
         if (!columnsDictionaryTest.executeTests())
         {

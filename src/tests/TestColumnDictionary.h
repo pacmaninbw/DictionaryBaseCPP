@@ -12,16 +12,22 @@
 #include <string>
 #include <vector>
 
+class ColumnDictionary;
+
 class TestColumnDictionary
 {
 public:
     TestColumnDictionary();
     ~TestColumnDictionary() = default;
     bool executeTests() noexcept;
+    bool executeStandAloneTests() noexcept;
+    bool executeCommonGDTests() noexcept;
 
 private:
-    bool testIdToName(ColumnIds input, std::string expectedOutput) noexcept;
-    bool testNameToID(std::string input, ColumnIds expectedOutput) noexcept;
+    bool commonGDIdToName(ColumnDictionary &underTest, ColumnIds input, std::string expectedOutput) noexcept;
+    bool commonGDNameToID(ColumnDictionary &underTest, std::string input, ColumnIds expectedOutput) noexcept;
+    bool standAloneIdToName(ColumnIds input, std::string expectedOutput) noexcept;
+    bool standAloneNameToID(std::string input, ColumnIds expectedOutput) noexcept;
     typedef struct CTestData
     {
         ColumnIds testId;
