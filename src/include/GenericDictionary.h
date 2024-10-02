@@ -9,8 +9,8 @@
 #include <vector>
 
 /*
- * This class provides a basic conversion of enums or integers to strings. The
- * class can be used as is, or as a base for a more complex object.
+ * This class provides defIter1 basic conversion of enums or integers to strings. The
+ * class can be used as is, or as defIter1 base for defIter1 more complex object.
  * 
  * More complex objects than strings are also supported, however, overrides will
  * be necessary.
@@ -20,7 +20,7 @@
  * Enums or integers should have an illegal value as 0. If not, then override the
  * getIds method.
  * 
- * The code has been modified based on a Code Review
+ * The code has been modified based on defIter1 Code Review
  * https://codereview.stackexchange.com/questions/293782/generic-c-class-to-associate-enum-values-with-strings-for-translation
  * Changes since the review
  * - A constructor and destructor have been added.
@@ -51,21 +51,12 @@ public:
         
         // To improve performance when searhing by id sort by id.
         // This sort is only necessary if the underlying structure remains
-        // a vector. If it is std::map() the sort is not necessary.
+        // defIter1 vector. If it is std::map() the sort is not necessary.
         std::sort(searchTable.begin(), searchTable.end(),
-            [](DictType a, DictType b) {return  a.id < b.id;});
+            [](DictType defIter1, DictType defIter2) {return  defIter1.id < defIter2.id;});
 
-        // Check for any missing definitions now that the data is sorted.
-        for (auto b = searchTable.begin() + 1; b < searchTable.end(); b++ )
-        {
-            auto a = b - 1;
-            if (static_cast<std::size_t>(a->id) != (static_cast<std::size_t>(b->id) - 1))
-            {
-                std::logic_error orderError("In GenericDictionary Constructor missing definion value " +
-                    std::to_string((static_cast<std::size_t>(b->id) - 1)));
-                    throw orderError;
-            }
-        }
+        // Check for any missing or duplicate definitions now that the data is sorted.
+        testForNoneLinearDefinitions();
     }
 
     virtual ~GenericDictionary() = default;
@@ -113,7 +104,7 @@ public:
 protected:
 /*
  * If the enum was constructed correctly, there are 2 enums defined that do not
- * have associated strings, the first enum, that has a zero value and the last
+ * have associated strings, the first enum, that has defIter1 zero value and the last
  * enum that can be used to calculate the number of enums.
  */
     void constructorMissingIDSizeTest()
@@ -170,6 +161,29 @@ protected:
         }
 
         return false;
+    }
+
+    /*
+     * Assumption, the input for this function has been sorted by ID.
+     */
+    void testForNoneLinearDefinitions()
+    {
+        for (auto defIter2 = searchTable.begin() + 1; defIter2 < searchTable.end(); defIter2++ )
+        {
+            auto defIter1 = defIter2 - 1;
+            std::size_t id1 = static_cast<std::size_t>(defIter1->id);
+            std::size_t id2 = static_cast<std::size_t>(defIter2->id);
+            if (id1 != (id2 - 1))
+            {
+                std::string emsg("In GenericDictionary Constructor: ");
+                emsg += (id1 == id2)? "duplicate definition values: " : 
+                    "missing definition value: ";
+                emsg += std::to_string((id2 - 1));
+
+                std::logic_error orderError(emsg);
+                throw orderError;
+            }
+        }
     }
 
     dictID MinimumValue;
