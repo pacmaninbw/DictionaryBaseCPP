@@ -13,6 +13,9 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
+# Old files that shouldn't be used
+ZOldNotUsed
+
 # Generated Code
 performanceTest.h
 
