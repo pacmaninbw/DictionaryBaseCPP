@@ -1,146 +1,17 @@
 #include <algorithm>
+#include "TestParameters.h"
+#include <filesystem>
 #include <iostream>
-#include <fstream>
+#include "PerformanceTestGenerator.h"
 #include <string>
 #include <vector>
 #include "../UtilityTimer.h"
 
-static std::size_t MinEnumVal = 1;
-static std::string enumTemplate("GD_PERFORMANCE_TEST_VALUE_");
-static std::string enumName("GDPerformanceTestEnum");
-static std::string testStrTemplate("Performance Test String ");
-static std::string testStrVectorName("GDPerformanceTestStrings");
+static constexpr std::size_t MIN_TEST_COUNT = 1;
+static constexpr std::size_t MAX_TEST_COUNT = 10;
+static constexpr std::size_t MIN_TEST_VALUE = 1;
+static constexpr std::size_t MAX_TEST_VALUE = (1024 * 512);
 
-static void generateEnum(std::ofstream &testOut, std::size_t testSize)
-{
-    testOut << "typedef enum class " << enumName << testSize << "\n";
-    testOut << "{\n\tGD_PERFORMANCE_TEST_INVALID_VALUE,\n";
-    for (std::size_t lcount = MinEnumVal; lcount <= testSize; ++lcount)
-    {
-        testOut << "\t" << enumTemplate << lcount << ",\n";
-    }
-    testOut << "\tGD_PERFORMANCE_LAST_ENUM\n} " << enumName << testSize << ";\n";
-}
-
-static void generateStringVector(std::ofstream &testOut, std::size_t testSize)
-{
-    testOut << "static std::vector<std::string> " << testStrVectorName << testSize << " = \n{\n"
-        "\t\"\", // For GD_PERFORMANCE_TEST_INVALID_VALUE\n";
-    for (std::size_t lcount = MinEnumVal; lcount <= testSize; ++lcount)
-    {
-        testOut << "\t\"" << testStrTemplate << lcount << "\",\n";
-    }
-    testOut << "\t\"\" // For GD_PERFORMANCE_LAST_ENUM\n};\n";
-}
-
-static std::string genEnumPreVal(std::size_t testSize)
-{
-    std::string tSize(std::to_string(testSize));
-    std::string preEnumValue(enumName);
-    return (preEnumValue += tSize);
-}
-
-static void genTestDataPairs(std::ofstream &testOut, std::size_t testSize, std::size_t tabCount = 1)
-{
-    std::string tSize(std::to_string(testSize));
-    std::string enumValue(genEnumPreVal(testSize));
-    enumValue += "::" + enumTemplate;
-    std::string strValue(testStrVectorName);
-    strValue += tSize + "[";
-    std::string tabPlusOpen;
-    for (std::size_t tcount = 0; tcount < tabCount; ++tcount)
-    {
-        tabPlusOpen += "\t";
-    }
-    tabPlusOpen += "{";
-
-    std::size_t lcount = MinEnumVal;
-    for (; lcount < testSize ; ++lcount)
-    {
-        testOut << tabPlusOpen << enumValue << lcount << ", " << strValue <<
-            lcount << "]},\n";
-    }
-    testOut << tabPlusOpen << enumValue << lcount << ", " << strValue <<
-            lcount << "]}\n";
-}
-
-static void genTestDataStructVector(std::ofstream &testOut, std::size_t testSize)
-{
-    std::string tpVecName("testData");
-    tpVecName += std::to_string(testSize);
-
-    testOut << "\nstatic std::vector<struct TestPairs<" << genEnumPreVal(testSize) <<
-        ">> " << tpVecName << " =\n{\n";
-    genTestDataPairs(testOut, testSize);
-    testOut << "};\n\n";
-}
-
-static std::string genTestFunc(std::ofstream &testOut, std::size_t testSize)
-{
-    std::string enumBase(genEnumPreVal(testSize));
-    std::string testName("performanceTest");
-    testName += std::to_string(testSize);
-
-    testOut << "static bool " << testName << "()\n{\n" <<
-        "\tbool testPassed = true;\n\tUtilityTimer testTimer;\n\n\tstd::string testName(\"" <<
-        testName <<"\");\n\n\ttry {\n" <<
-        "\t\tstd::clog << \"Testing GenericDictionary with enum of size " << testSize << "\\n\";" <<
-        "\n\t\ttestTimer.startTimer();" <<
-        "\n\t\tGenericDictionary <" << enumBase  << ", std::string> underTest (\n";
-    enumBase += "::";
-    testOut << "\t\t\t" << enumBase << "GD_PERFORMANCE_TEST_INVALID_VALUE,\n"
-        "\t\t\t" << enumBase << "GD_PERFORMANCE_LAST_ENUM,\n\t\t\t{\n";
-    genTestDataPairs(testOut, testSize, 4);
-    testOut << "\t\t\t}\n\t\t);\n\t\ttestTimer.stopTimerAndReport(\"Performance Test Constructor \" + testName + \" \");\n\n\t\t" <<
-        "testPassed = performanceExecution<" << genEnumPreVal(testSize) <<
-        ">(underTest, testData" << testSize << ", testName);\n"
-        "\n\t}\n"
-        "\tcatch (const std::logic_error &le)\n\t{\n"
-        "\t\tstd::cerr << \"TestGenericDictionary::testContructorPositivePath() logic_error: \" << le.what() << \"\\n\\n\";\n"
-        "\t\ttestPassed = false;\n\t}\n"
-        "\tcatch(const std::exception& e)\n\t{\n"
-        "\t\tstd::cerr << \"TestGenericDictionary::testContructorPositivePath() UNKNOWN EXCEPTION: \" << e.what() << \"\\n\";\n"        
-        "\t\ttestPassed = false;\n\t}\n";
-    testOut << "\tstd::clog << \"GenericDictionary Constructor " << testName <<
-        " \" << (testPassed? \"PASSED\\n\\n\": \"FAILED\\n\\n\");\n\n"
-        "\treturn testPassed;\n}\n\n";
-
-    return testName;
-}
-
-
-static std::string generateAllTestDataAndTest(std::ofstream &testOut, std::size_t testSize)
-{
-    testOut << "// Generated GenericDictionary Performance Test Values for an enum class of ";
-    testOut << testSize << " enum values\n\n";
-
-    generateEnum(testOut, testSize);
-
-    testOut << "\n";
-    generateStringVector(testOut, testSize);
-
-    testOut << "\n";
-    genTestDataStructVector(testOut, testSize);
-
-    testOut << "\n";
-    return genTestFunc(testOut, testSize);
-}
-
-static void genPerformanceTest(std::ofstream &testOut, std::vector<std::size_t> testValues)
-{
-    std::vector<std::string> testNames;
-    for (auto test: testValues)
-    {
-        testNames.push_back(generateAllTestDataAndTest(testOut, test));
-    }
-
-    testOut << "bool performancetests()\n{\n\tbool allTestsPassed = true;\n\n";
-    for (auto test: testNames)
-    {
-        testOut << "\tif (allTestsPassed)\n\t{\n\t\tallTestsPassed = " << test << "();\n\t}\n";
-    }
-    testOut << "\n\treturn allTestsPassed;\n}\n\n";
-}
 
 static bool is_number(const std::string& s)
 {
@@ -148,33 +19,68 @@ static bool is_number(const std::string& s)
         s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
 }
 
+static std::size_t safeNumericConversion(std::string userInput, std::size_t minValue, std::size_t maxValue)
+{
+    if (is_number(userInput))
+    {
+        std::size_t safeNumber = std::stoi(userInput);
+        if (safeNumber >= minValue || safeNumber <= maxValue)
+        {
+            return safeNumber;
+        }
+    }
+
+    return 0;
+}
+
+enum class ArgTypes
+{
+    TestSize,
+    TestCount,
+    OutPutFile,
+    ErrorArgType
+};
+struct TestArgData
+{
+    std::string argName;
+    ArgTypes argType;
+    std::string helpMessage;
+};
+
+static std::vector<struct TestArgData> testInfo =
+{
+    {"-c", ArgTypes::TestCount, "-c integer value between 1 and 10, the number of tests to generate"},
+    {"--test-count", ArgTypes::TestCount, "--test-count integer value between 1 and 10, the number of tests to generate"},
+    {"-s", ArgTypes::TestSize, "-c integer value between 1 and 10 The number of enum values in this test to generate"},
+    {"--test-size", ArgTypes::TestSize, "The number of enum values in this test to generate"},
+    {"-f", ArgTypes::OutPutFile, "The name of the output file to be generated"},
+    {"--output-file", ArgTypes::OutPutFile, "The name of the output file to be generated"},
+};
+
+static struct TestArgData getArgType(std::string flagStr) noexcept
+{
+    auto argData = std::find_if(testInfo.begin(), testInfo.end(),
+        [&flagStr](struct TestArgData &flagData) {return (flagData.argName == flagStr);});
+
+    return (argData != testInfo.end()? *argData : TestArgData{"error", ArgTypes::ErrorArgType, "Unknown switch"});
+}
+
 static std::size_t safeUserNumericInput(std::string message, std::size_t minValue, std::size_t maxValue)
 {
-    std::size_t safeNumber;
-
+    std::size_t safeNumber = 0;
     std::string safeInput;
-    bool hasNumber = false;
 
     do {
         std::cout << message << " [" << minValue << "," << maxValue << "]\n>>";
         std::cin >> safeInput;
-        hasNumber = is_number(safeInput);
-        if (hasNumber)
-        {
-            safeNumber = std::stoi(safeInput);
-            hasNumber = (safeNumber >= minValue || safeNumber <= maxValue);
-        }
-    } while (!hasNumber);
+        safeNumber = safeNumericConversion(safeInput, minValue, maxValue);
+    } while (safeNumber < 1);
 
     return safeNumber;
 }
 
 static std::vector<std::size_t> getUserInput()
 {
-    const std::size_t MIN_TEST_COUNT = 1;
-    const std::size_t MAX_TEST_COUNT = 10;
-    const std::size_t MIN_TEST_VALUE = 1;
-    const std::size_t MAX_TEST_VALUE = (1024 * 1024 * 3);
 
     std::vector<std::size_t> testValues;
 
@@ -190,34 +96,109 @@ static std::vector<std::size_t> getUserInput()
     return testValues;
 }
 
-int main(void)
+static std::string simplify_name(char *path)
+{
+	return std::filesystem::path{path ? path : "createPerformanceTest"}.filename().string();
+}
+
+static void usage()
+{
+    std::cerr << "Errors ocurred either processing the command line or during user input.";
+}
+
+static bool processTestCount(std::string userInput,  std::size_t& testCount)
+{
+    std::size_t input = safeNumericConversion(userInput, MIN_TEST_COUNT, MAX_TEST_COUNT);
+    if (input > MIN_TEST_COUNT)
+    {
+        testCount = input;
+        return true;
+    }
+
+    return false;
+}
+
+static bool processTestSize(std::string userInput, struct TestParameters& testParameters)
+{
+    std::size_t input = safeNumericConversion(userInput, MIN_TEST_VALUE, MAX_TEST_VALUE);
+    if (input > MIN_TEST_VALUE)
+    {
+        testParameters.testValues.push_back(input);
+        return true;
+    }
+
+    return false;
+}
+
+static bool processOutputFile(std::string userInput, struct TestParameters& testParameters)
+{
+    testParameters.outPutFile = userInput;
+    testParameters.useCout = false;
+    return true;
+}
+
+static bool getTestParameters(int argc, char* argv[], struct TestParameters& testParameters)
+{
+    std::vector<std::string> args = {argv + 1, argv + argc};
+    testParameters.progName = simplify_name(argv[0]);
+    std::size_t testCount = 0;
+
+    for (int currentArg = 0; currentArg < argc - 1; ++currentArg)
+    {
+        if (args[currentArg][0] == '-')
+        {
+            auto testDatum = getArgType(args[currentArg]);
+            switch (testDatum.argType)
+            {
+                case ArgTypes::TestCount :
+                    processTestCount(args[++currentArg], testCount);
+                    break;
+                case ArgTypes::TestSize :
+                    processTestSize(args[++currentArg], testParameters);
+                    break;
+                case ArgTypes::OutPutFile :
+                    processOutputFile(args[++currentArg], testParameters);
+                    break;
+                default:
+                    std::cerr << "Unknown switch " << args[currentArg] << " in command line\n";
+                    return false;
+            }
+        }
+    }
+
+    if (testParameters.testValues.size() == 0)
+    {
+        testParameters.testValues = getUserInput();
+    }
+
+    if (testCount > 0 && testCount != testParameters.testValues.size())
+    {
+        usage();
+        return false;
+    }
+
+    return true;
+}
+
+int main(int argc, char* argv[])
 {
     int exitStatus = EXIT_SUCCESS;
 
-    std::ofstream testOut;
-    testOut.open("performanceTest.h");
+    TestParameters testParameters;
 
-    std::vector<std::size_t> testValues = getUserInput();
+    exitStatus = getTestParameters(argc, argv, testParameters)? EXIT_SUCCESS: EXIT_FAILURE;
 
-    testOut << "#ifndef GD_PERFORMANCETEST_H_\n";
-    testOut << "#define GD_PERFORMANCETEST_H_\n\n";
-    testOut << "// Warning, this file is generated by a test generator\n";
-    testOut << "// This file contains " << testValues.size() << " performance tests\n";
-    testOut << "// ";
-    for (auto testEnumCount: testValues)
+    if (exitStatus == EXIT_SUCCESS)
     {
-        testOut << " test " << testEnumCount << "enum values";
+        PerformanceTestGenerator generator(testParameters);
+        std::string cmdLine(simplify_name(argv[0]));
+        cmdLine += ' ';
+        for (int i = 1; i < argc; i++)
+        {
+            cmdLine += argv[i] + ' ';
+        }
+        exitStatus = generator.generateAllPerformaneTests()? EXIT_SUCCESS: EXIT_FAILURE;
     }
-    testOut << "\n\n";
-    testOut << "#include \"../../include/GenericDictionary.h\"\n";
-    testOut << "#include \"../BasicGenericDictionaryTests.h\"\n";
-    testOut << "#include <string>\n";
-    testOut << "#include \"../UtilityTimer.h\"\n";
-    testOut << "#include <vector>\n\n\n";
-    genPerformanceTest(testOut, testValues);
-    testOut << "#endif // GD_PERFORMANCETEST_H_\n\n";
 
-    testOut.close();
-
-    return exitStatus;
+    return exitStatus;    
 }

@@ -5,7 +5,7 @@ project(createPerformanceTest LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(createPerformanceTest main.cpp)
+add_executable(createPerformanceTest main.cpp PerformanceTestGenerator.cpp)
 
 target_compile_features(createPerformanceTest PUBLIC cxx_std_20)
 
