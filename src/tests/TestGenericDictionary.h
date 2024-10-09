@@ -7,7 +7,7 @@
 /*
  * GD for GenericDictionary
  */
-typedef enum class GDPositivePathEnum
+enum class GDPositivePathEnum
 {
     GDPOSITIVE_INVALID_VALUE,
     GDPOSITIVE_TEST_VALUE_1,
@@ -17,13 +17,13 @@ typedef enum class GDPositivePathEnum
     GDPOSITIVE_TEST_VALUE_5,
     GDPOSITIVE_TEST_VALUE_6,
     GDPOSITIVE_LAST_ENUM
-} GDPositivePathEnum;
+};
 
-typedef struct TestPairs
-    {
-        GDPositivePathEnum testID;
-        std::string testName;
-    } TestPairs;
+struct TestPairs
+{
+    GDPositivePathEnum testID;
+    std::string testName;
+};
 
 class TestGenericDictionary
 {
