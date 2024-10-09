@@ -28,11 +28,11 @@ private:
     bool commonGDNameToID(ColumnDictionary &underTest, std::string input, ColumnIds expectedOutput) noexcept;
     bool standAloneIdToName(ColumnIds input, std::string expectedOutput) noexcept;
     bool standAloneNameToID(std::string input, ColumnIds expectedOutput) noexcept;
-    typedef struct CTestData
+    struct CTestData
     {
         ColumnIds testId;
         std::string testName;
-    } CTestData;
+    };
     std::vector<CTestData> positiveColumnTestData;
 };
 
