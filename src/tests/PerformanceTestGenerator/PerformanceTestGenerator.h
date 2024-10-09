@@ -9,7 +9,7 @@
 
 class PerformanceTestGenerator {
 public:
-    PerformanceTestGenerator(struct TestParameters testParameters);
+    PerformanceTestGenerator(TestParameters testParameters);
     ~PerformanceTestGenerator();
     bool generateAllPerformaneTests() noexcept;
 
@@ -32,6 +32,7 @@ private:
     const char* testStrVectorName{"GDPerformanceTestStrings"};
     std::vector<std::size_t> testValues;
     std::string progName;
+    std::string version;
     bool useCout = true;
     std::string outPutFileName;
     std::ofstream outPutFile;
