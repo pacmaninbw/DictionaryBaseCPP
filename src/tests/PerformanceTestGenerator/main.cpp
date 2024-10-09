@@ -38,6 +38,7 @@ enum class ArgTypes
     TestSize,
     TestCount,
     OutPutFile,
+    Help,
     ErrorArgType
 };
 struct TestArgData
@@ -47,7 +48,7 @@ struct TestArgData
     std::string helpMessage;
 };
 
-static std::vector<struct TestArgData> testInfo =
+static std::vector<TestArgData> testInfo =
 {
     {"-c", ArgTypes::TestCount, "-c integer value between 1 and 10, the number of tests to generate"},
     {"--test-count", ArgTypes::TestCount, "--test-count integer value between 1 and 10, the number of tests to generate"},
@@ -55,12 +56,13 @@ static std::vector<struct TestArgData> testInfo =
     {"--test-size", ArgTypes::TestSize, "The number of enum values in this test to generate"},
     {"-f", ArgTypes::OutPutFile, "The name of the output file to be generated"},
     {"--output-file", ArgTypes::OutPutFile, "The name of the output file to be generated"},
+    {"--help", ArgTypes::Help, "Print this help message."}
 };
 
-static struct TestArgData getArgType(std::string flagStr) noexcept
+static TestArgData getArgType(std::string flagStr) noexcept
 {
     auto argData = std::find_if(testInfo.begin(), testInfo.end(),
-        [&flagStr](struct TestArgData &flagData) {return (flagData.argName == flagStr);});
+        [&flagStr](TestArgData &flagData) {return (flagData.argName == flagStr);});
 
     return (argData != testInfo.end()? *argData : TestArgData{"error", ArgTypes::ErrorArgType, "Unknown switch"});
 }
@@ -101,14 +103,24 @@ static std::string simplify_name(char *path)
 	return std::filesystem::path{path ? path : "createPerformanceTest"}.filename().string();
 }
 
-static void usage()
+static void usage(TestParameters& testParameters)
 {
-    std::cerr << "Errors ocurred either processing the command line or during user input.";
+    std::cerr << testParameters.progName << " " << testParameters.version << "\n";
+    for (auto tad: testInfo)
+    {
+        std::cerr << tad.argName << ": " << tad.helpMessage << "\n";
+    }
 }
 
-static bool processTestCount(std::string userInput,  std::size_t& testCount)
+static bool processTestCount(std::vector<std::string> args, std::size_t currentArg, std::size_t& testCount)
 {
-    std::size_t input = safeNumericConversion(userInput, MIN_TEST_COUNT, MAX_TEST_COUNT);
+    if (!(currentArg < args.size()) || args[currentArg][0] == '-')
+    {
+        std::cerr << "Missing integer value for --test-size\n\n";
+        return false;
+    }
+
+    std::size_t input = safeNumericConversion(args[currentArg], MIN_TEST_COUNT, MAX_TEST_COUNT);
     if (input > MIN_TEST_COUNT)
     {
         testCount = input;
@@ -118,9 +130,16 @@ static bool processTestCount(std::string userInput,  std::size_t& testCount)
     return false;
 }
 
-static bool processTestSize(std::string userInput, struct TestParameters& testParameters)
+static bool processTestSize(std::vector<std::string> args, std::size_t currentArg, TestParameters& testParameters)
 {
-    std::size_t input = safeNumericConversion(userInput, MIN_TEST_VALUE, MAX_TEST_VALUE);
+    if (!(currentArg < args.size()) || args[currentArg][0] == '-')
+    {
+        std::cerr << "Missing integer value for --test-size\n\n";
+        usage(testParameters);
+        return false;
+    }
+
+    std::size_t input = safeNumericConversion(args[currentArg], MIN_TEST_VALUE, MAX_TEST_VALUE);
     if (input > MIN_TEST_VALUE)
     {
         testParameters.testValues.push_back(input);
@@ -130,40 +149,89 @@ static bool processTestSize(std::string userInput, struct TestParameters& testPa
     return false;
 }
 
-static bool processOutputFile(std::string userInput, struct TestParameters& testParameters)
+static bool processOutputFile(std::vector<std::string> args, std::size_t currentArg, TestParameters& testParameters)
 {
-    testParameters.outPutFile = userInput;
+    if (!(currentArg < args.size()) || args[currentArg][0] == '-')
+    {
+        std::cerr << "Missing output filename for --output-file\n\n";
+        usage(testParameters);
+        return false;
+    }
+
+    testParameters.outPutFile = args[currentArg];
     testParameters.useCout = false;
     return true;
 }
 
-static bool getTestParameters(int argc, char* argv[], struct TestParameters& testParameters)
+static bool verifyTestCount(std::size_t testCount, TestParameters& testParameters)
 {
-    std::vector<std::string> args = {argv + 1, argv + argc};
-    testParameters.progName = simplify_name(argv[0]);
-    std::size_t testCount = 0;
+    if (testCount > 0 && testCount != testParameters.testValues.size())
+    {
+        std::cerr << "--test-count value (" << std::to_string(testCount) <<
+            ") does not agree with number of test sizes input (" <<
+            std::to_string(testParameters.testValues.size()) << ")\n\n\n";
+        usage(testParameters);
+        return false;
+    }
 
-    for (int currentArg = 0; currentArg < argc - 1; ++currentArg)
+    return true;
+}
+
+static bool processArguments(std::vector<std::string> args, TestParameters& testParameters, std::size_t& testCount)
+{
+    for (std::size_t currentArg = 0; currentArg < args.size(); ++currentArg)
     {
         if (args[currentArg][0] == '-')
         {
             auto testDatum = getArgType(args[currentArg]);
             switch (testDatum.argType)
             {
-                case ArgTypes::TestCount :
-                    processTestCount(args[++currentArg], testCount);
-                    break;
-                case ArgTypes::TestSize :
-                    processTestSize(args[++currentArg], testParameters);
-                    break;
-                case ArgTypes::OutPutFile :
-                    processOutputFile(args[++currentArg], testParameters);
-                    break;
                 default:
                     std::cerr << "Unknown switch " << args[currentArg] << " in command line\n";
+                    usage(testParameters);
                     return false;
+                case ArgTypes::Help:
+                    usage(testParameters);
+                    return false;
+            // The following flags are followed by a required argument
+                case ArgTypes::TestCount :
+                    ++currentArg;
+                    if (!processTestCount(args, currentArg, testCount))
+                    {
+                        usage(testParameters);
+                        return false;
+                    }
+                    break;
+                case ArgTypes::TestSize :
+                    ++currentArg;
+                    if (!processTestSize(args, currentArg, testParameters))
+                    {
+                        return false;
+                    }
+                    break;
+                case ArgTypes::OutPutFile :
+                    ++currentArg;
+                    if (!processOutputFile(args, currentArg, testParameters))
+                    {
+                        return false;
+                    }
+                    break;
             }
         }
+    }
+
+    return true;
+}
+
+static bool getTestParameters(int argc, char* argv[], TestParameters& testParameters)
+{
+    std::vector<std::string> args = {argv + 1, argv + argc};
+    testParameters.progName = simplify_name(argv[0]);
+    std::size_t testCount = 0;
+
+    if (!processArguments(args, testParameters, testCount))
+    {
+        return false;
     }
 
     if (testParameters.testValues.size() == 0)
@@ -171,13 +239,7 @@ static bool getTestParameters(int argc, char* argv[], struct TestParameters& tes
         testParameters.testValues = getUserInput();
     }
 
-    if (testCount > 0 && testCount != testParameters.testValues.size())
-    {
-        usage();
-        return false;
-    }
-
-    return true;
+    return verifyTestCount(testCount, testParameters);
 }
 
 int main(int argc, char* argv[])
@@ -185,18 +247,13 @@ int main(int argc, char* argv[])
     int exitStatus = EXIT_SUCCESS;
 
     TestParameters testParameters;
+    testParameters.version = "2.0.0";
 
     exitStatus = getTestParameters(argc, argv, testParameters)? EXIT_SUCCESS: EXIT_FAILURE;
 
     if (exitStatus == EXIT_SUCCESS)
     {
         PerformanceTestGenerator generator(testParameters);
-        std::string cmdLine(simplify_name(argv[0]));
-        cmdLine += ' ';
-        for (int i = 1; i < argc; i++)
-        {
-            cmdLine += argv[i] + ' ';
-        }
         exitStatus = generator.generateAllPerformaneTests()? EXIT_SUCCESS: EXIT_FAILURE;
     }
 
