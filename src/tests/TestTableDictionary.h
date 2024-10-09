@@ -31,11 +31,11 @@ private:
     bool standAloneTestNamesToID(std::pair<std::string, std::string> input, TableIds expectedOutput) noexcept;
     bool standAloneTestNameToID(std::string input, TableIds expectedOutput) noexcept; 
     bool standAloneTestIdToName(TableIds input, std::pair<std::string, std::string>  expectedOutput) noexcept;
-    typedef struct TableIDTestData
+    struct TableIDTestData
     {
         TableIds testID;
         std::pair<std::string, std::string> testNames;
-    } TableIDTestData;
+    };
     std::vector<TableIDTestData> TTestData;
 };
 
