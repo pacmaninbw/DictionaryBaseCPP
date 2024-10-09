@@ -6,8 +6,9 @@
 
 struct TestParameters
 {
-    std::vector<std::size_t> testValues;
     std::string progName;
+    std::string version;
+    std::vector<std::size_t> testValues;
     bool useCout = true;
     std::string outPutFile;
 };
