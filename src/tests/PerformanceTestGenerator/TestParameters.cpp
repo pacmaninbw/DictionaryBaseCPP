@@ -17,13 +17,13 @@ TestParameters::TestParameters(int argc, char *argv[])
     progName = simplify_name(argv[0]);
     testInfo = 
     {
-        {"-c", ArgTypes::TestCount, "-c integer value between 1 and 10, the number of tests to generate"},
-        {"--test-count", ArgTypes::TestCount, "--test-count integer value between 1 and 10, the number of tests to generate"},
-        {"-s", ArgTypes::TestSize, "-c integer value between 1 and 10 The number of enum values in this test to generate"},
-        {"--test-size", ArgTypes::TestSize, "The number of enum values in this test to generate"},
-        {"-f", ArgTypes::OutPutFile, "The name of the output file to be generated"},
-        {"--output-file", ArgTypes::OutPutFile, "The name of the output file to be generated"},
-        {"--help", ArgTypes::Help, "Print this help message."}
+        {"--output-file FILENAME", ArgTypes::OutPutFile, "The name of the output file to be generated"},
+        {"--test-count INTEGER", ArgTypes::TestCount, "\ttest count: integer value between 1 and 10, the number of tests to generate"},
+        {"--test-size INTEGER", ArgTypes::TestSize, "\ttest size: integer value between 1 and 524288 The number of enum values in this test to generat"},
+        {"-c INTEGER", ArgTypes::TestCount, "\t\ttest count: integer value between 1 and 10, the number of tests to generate"},
+        {"-s INTEGER", ArgTypes::TestSize, "\t\ttest size: integer value between 1 and 524288 The number of enum values in this test to generate"},
+        {"-f FILENAME", ArgTypes::OutPutFile, "\t\tThe name of the output file to be generated"},
+        {"--help", ArgTypes::Help, "\t\tPrint this help message."}
     };
 }
 
@@ -59,10 +59,18 @@ bool TestParameters::verifyTestCount() const noexcept
 void TestParameters::usage() const noexcept
 {
     std::cerr << progName << " " << version << "\n";
+    std::cerr << "Usage: " << progName <<
+        " [ [--output-file FILENAME] --test-count INTEGER --test-size INTEGER"
+        " [--test-size INTEGER]*]\n";
     for (auto tad: testInfo)
     {
         std::cerr << tad.argName << ": " << tad.helpMessage << "\n";
     }
+
+    std::cerr << "\nBy default the output of the program goes to the screen. The user can over ride this\n";
+    std::cerr << "by either redirecting the output to a file or specifying the output file with the\n";
+    std::cerr << "--output-file flag. If the user doesn't provide any arguments on the command line\n";
+    std::cerr << "the program will request the number of tests and the test sizes\n";
 }
 
 void TestParameters::getUserInput() noexcept
