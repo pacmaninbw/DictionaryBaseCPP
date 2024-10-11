@@ -7,7 +7,7 @@
 
 static std::string simplify_name(char *path)
 {
-	return std::filesystem::path{path ? path : "wconsteroids"}.filename().string();
+	return std::filesystem::path{path ? path : "createPerformanceTest"}.filename().string();
 }
 
 TestParameters::TestParameters(int argc, char *argv[])
