@@ -9,7 +9,7 @@
 
 template <typename enumDictType>
 static bool testIdToName(
-	GenericDictionary<enumDictType, std::string> &underTest,
+	GenericDictionary<enumDictType, std::string>& underTest,
 	enumDictType testID,
 	std::string expectedOutput,
 	std::string errorMessage
@@ -32,7 +32,7 @@ static bool testIdToName(
 
 template <typename enumDictType>
 static bool testNameToID(
-	GenericDictionary<enumDictType, std::string> &underTest,
+	GenericDictionary<enumDictType, std::string>& underTest,
 	std::string testName,
 	enumDictType expectedOutput,
 	std::string errorMessage
@@ -62,8 +62,8 @@ struct TestPairs
 
 template <typename enumDictType>
 static bool testIDtoNameLoop(
-    GenericDictionary <enumDictType, std::string> &underTest,
-    std::vector<struct TestPairs<enumDictType>> &TestData,
+    GenericDictionary <enumDictType, std::string>& underTest,
+    std::vector<struct TestPairs<enumDictType>>& TestData,
     std::string errorMessage
 )
 {
@@ -92,8 +92,8 @@ static bool testIDtoNameLoop(
 
 template <typename enumDictType>
 static bool testNametoIDLoop(
-    GenericDictionary <enumDictType, std::string> &underTest,
-    std::vector<struct TestPairs<enumDictType>> &TestData,
+    GenericDictionary <enumDictType, std::string>& underTest,
+    std::vector<struct TestPairs<enumDictType>>& TestData,
     std::string errorMessage
 )
 {
@@ -122,8 +122,8 @@ static bool testNametoIDLoop(
 
 template <typename enumDictType>
 static bool testMinMaxMiddleValues(
-    GenericDictionary <enumDictType, std::string> &underTest,
-    std::vector<struct TestPairs<enumDictType>> &testData,
+    GenericDictionary <enumDictType, std::string>& underTest,
+    std::vector<struct TestPairs<enumDictType>>& testData,
     std::string testName
 )
 {
@@ -171,8 +171,8 @@ static bool testMinMaxMiddleValues(
 
 template <typename enumDictType>
 static bool performanceExecution(
-    GenericDictionary <enumDictType, std::string> &underTest,
-    std::vector<struct TestPairs<enumDictType>> &testData,
+    GenericDictionary <enumDictType, std::string>& underTest,
+    std::vector<struct TestPairs<enumDictType>>& testData,
     std::string testName
 )
 {
