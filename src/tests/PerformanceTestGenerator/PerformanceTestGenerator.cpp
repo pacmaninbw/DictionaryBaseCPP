@@ -55,8 +55,28 @@ bool PerformanceTestGenerator::generateAllPerformaneTests() noexcept
         return false;
     }
 
-    genPerformanceTest();
+    if (!genPerformanceTest())
+    {
+        return false;
+    }
+
     std::cout << "#endif // GD_PERFORMANCETEST_H_\n\n";
+
+    std::cout << std::flush;
+    if (!std::cout.flush())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool PerformanceTestGenerator::generateEnumValues(std::size_t testSize) const noexcept
+{
+    for (std::size_t lcount = MinEnumVal; lcount <= testSize; ++lcount)
+    {
+        std::cout << "\t" << enumTemplate << lcount << ",\n";
+    }
 
     std::cout << std::flush;
     if (!std::cout.flush())
@@ -70,12 +90,14 @@ bool PerformanceTestGenerator::generateAllPerformaneTests() noexcept
 bool PerformanceTestGenerator::generateEnum(std::size_t testSize) const noexcept
 {
     std::cout << "enum class " << enumName << testSize << "\n";
-    std::cout << "{\n\tGD_PERFORMANCE_TEST_INVALID_VALUE,\n";
-    for (std::size_t lcount = MinEnumVal; lcount <= testSize; ++lcount)
+    std::cout << "{\n\t" << firstEnum <<",\n";
+
+    if (!generateEnumValues(testSize))
     {
-        std::cout << "\t" << enumTemplate << lcount << ",\n";
+        return false;
     }
-    std::cout << "\tGD_PERFORMANCE_LAST_ENUM\n};\n";
+
+    std::cout << "\t" << lastEnum << "\n};\n";
     std::cout << std::flush;
     if (!std::cout.flush())
     {
@@ -85,15 +107,15 @@ bool PerformanceTestGenerator::generateEnum(std::size_t testSize) const noexcept
     return true;
 }
 
-bool PerformanceTestGenerator::generateStringVector(std::size_t testSize) const noexcept
+bool PerformanceTestGenerator::generateEnumStringValues(std::size_t testSize) const noexcept
 {
     std::cout << "static std::vector<std::string> " << testStrVectorName << testSize << " = \n{\n"
-        "\t\"\", // For GD_PERFORMANCE_TEST_INVALID_VALUE\n";
+        "\t\"\", // For " << firstEnum << "\n";
     for (std::size_t lcount = MinEnumVal; lcount <= testSize; ++lcount)
     {
         std::cout << "\t\"" << testStrTemplate << lcount << "\",\n";
     }
-    std::cout << "\t\"\" // For GD_PERFORMANCE_LAST_ENUM\n};\n";
+    std::cout << "\t\"\" // For " << lastEnum << "\n};\n";
     std::cout << std::flush;
     if (!std::cout.flush())
     {
@@ -147,7 +169,7 @@ bool PerformanceTestGenerator::genTestDataPairs(std::size_t testSize, std::size_
     return true;
 }
 
-bool PerformanceTestGenerator::genTestDataStructVector(std::size_t testSize) const noexcept
+bool PerformanceTestGenerator::genTestDataPairsTable(std::size_t testSize) const noexcept
 {
     std::string tpVecName("testData");
     tpVecName += std::to_string(testSize);
@@ -180,10 +202,17 @@ std::string PerformanceTestGenerator::genTestFunc(std::size_t testSize) const no
         "\t\tstd::clog << \"Testing GenericDictionary with enum of size " << testSize << "\\n\";" <<
         "\n\t\ttestTimer.startTimer();" <<
         "\n\t\tGenericDictionary <" << enumBase  << ", std::string> underTest (\n";
+
     enumBase += "::";
-    std::cout << "\t\t\t" << enumBase << "GD_PERFORMANCE_TEST_INVALID_VALUE,\n"
-        "\t\t\t" << enumBase << "GD_PERFORMANCE_LAST_ENUM,\n\t\t\t{\n";
-    genTestDataPairs(testSize, 4);
+
+    std::cout << "\t\t\t" << enumBase << firstEnum << ",\n"
+        "\t\t\t" << enumBase << lastEnum << ",\n\t\t\t{\n";
+
+    if (!genTestDataPairs(testSize, 4))
+    {
+        return "";
+    }
+
     std::cout << "\t\t\t}\n\t\t);\n\t\ttestTimer.stopTimerAndReport(\"Performance Test Constructor \" + testName + \" \");\n\n\t\t" <<
         "testPassed = performanceExecution<" << enumName + std::to_string(testSize)  <<
         ">(underTest, testData" << testSize << ", testName);\n"
@@ -216,10 +245,10 @@ std::string PerformanceTestGenerator::generateAllTestDataAndTest(std::size_t tes
     if (!generateEnum(testSize)) return "";
 
     std::cout << "\n";
-    if (!generateStringVector(testSize)) return "";
+    if (!generateEnumStringValues(testSize)) return "";
 
     std::cout << "\n";
-    if (!genTestDataStructVector(testSize)) return "";
+    if (!genTestDataPairsTable(testSize)) return "";
 
     std::cout << "\n";
     return genTestFunc(testSize);
@@ -229,9 +258,9 @@ bool PerformanceTestGenerator::genPerformanceTest() const noexcept
 {
     std::vector<std::string> testNames;
 
-    for (auto test: testValues)
+    for (auto testSize: testValues)
     {
-        std::string testName(generateAllTestDataAndTest(test));
+        std::string testName(generateAllTestDataAndTest(testSize));
         if (testName.length() > 0)
         {
             testNames.push_back(testName);
@@ -257,5 +286,4 @@ bool PerformanceTestGenerator::genPerformanceTest() const noexcept
 
     return true;
 }
-
 
