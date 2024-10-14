@@ -181,11 +181,10 @@ std::size_t TestParameters::safeUserNumericInput(std::string message, TestRange 
 
 std::size_t TestParameters::safeNumericConversion(std::string userInput, TestRange testRange)
 {
-    std::size_t safeNumber = 0;
-    
     try
     {
-        safeNumber = static_cast<std::size_t>(std::stoi(userInput, nullptr, 16));
+        std::size_t safeNumber = static_cast<std::size_t>(std::stoi(userInput, nullptr, 16));
+        return ((safeNumber >= testRange.min && safeNumber <= testRange.max)? safeNumber : 0);
     }
     catch(std::invalid_argument& e)
     {
@@ -195,8 +194,6 @@ std::size_t TestParameters::safeNumericConversion(std::string userInput, TestRan
     {
         return 0;
     }
-    
-    return ((safeNumber >= testRange.min && safeNumber <= testRange.max)? safeNumber : 0);
 }
 
 bool TestParameters::hasRequiredArgument(std::size_t currentArg, ArgTypes argType) noexcept
