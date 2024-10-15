@@ -63,7 +63,7 @@ struct TestPairs
 template <typename enumDictType>
 static bool testIDtoNameLoop(
     GenericDictionary <enumDictType, std::string>& underTest,
-    std::vector<struct TestPairs<enumDictType>>& TestData,
+    std::vector<TestPairs<enumDictType>>& TestData,
     std::string errorMessage
 )
 {
@@ -93,7 +93,7 @@ static bool testIDtoNameLoop(
 template <typename enumDictType>
 static bool testNametoIDLoop(
     GenericDictionary <enumDictType, std::string>& underTest,
-    std::vector<struct TestPairs<enumDictType>>& TestData,
+    std::vector<TestPairs<enumDictType>>& TestData,
     std::string errorMessage
 )
 {
@@ -123,7 +123,7 @@ static bool testNametoIDLoop(
 template <typename enumDictType>
 static bool testMinMaxMiddleValues(
     GenericDictionary <enumDictType, std::string>& underTest,
-    std::vector<struct TestPairs<enumDictType>>& testData,
+    std::vector<TestPairs<enumDictType>>& testData,
     std::string testName
 )
 {
@@ -172,7 +172,7 @@ static bool testMinMaxMiddleValues(
 template <typename enumDictType>
 static bool performanceExecution(
     GenericDictionary <enumDictType, std::string>& underTest,
-    std::vector<struct TestPairs<enumDictType>>& testData,
+    std::vector<TestPairs<enumDictType>>& testData,
     std::string testName
 )
 {
