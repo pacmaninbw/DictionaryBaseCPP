@@ -14,6 +14,7 @@ public:
     bool generateAllPerformaneTests() noexcept;
 
 private:
+    void dataPairLineOut(std::size_t lineC, std::string tabPlusOpen, bool lastLine) const noexcept;
     bool genTestDataPairs(std::size_t testSize, std::size_t tabCount) const noexcept;
     bool genTestDataPairsTable(std::size_t testSize) const noexcept;
     std::string genTestFunc(std::size_t testSize) const noexcept;
@@ -21,26 +22,26 @@ private:
     bool genPerformanceTest() const noexcept;
     bool generateEnumValues(std::size_t testSize) const noexcept;
     bool generateEnum(std::size_t testSize) const noexcept;
-    bool generateEnumStringValues(std::size_t testSize) const noexcept;
     std::string reconstructCommandLine() noexcept;
 
-/*
- * The first 5 constants are used for enumeration code generation. While C++ enums
- * start at zero, the GenericDictionary class assumes that an enum with the value
- * of zero is an invalid, valid enums values are 1 through test size.
- * 
- * GD stands for GenericDicionary
- */
+
+    /*
+     * The first 5 constants are used for enumeration code generation. While C++ enums
+     * start at zero, the GenericDictionary class assumes that an enum with the value
+     * of zero is an invalid, valid enums values are 1 through test size.
+     *
+     * GD stands for GenericDicionary
+     */
     const std::size_t MinEnumVal = 1;
     const char* enumTemplate{"GD_PerfTestEnumValue_"};
     const char* enumName{"GDPerformanceTestEnum"};
     const char* firstEnum{"GD_Perf_Test_Invalid_enum_Value"};
     const char* lastEnum{"GD_Perf_Test_Last_Enum"};
 /*
- * The following 2 constants are for testing the strings associated with the enums.
+ * The following constant are for testing the strings associated with the enums.
  */
     const char* testStrTemplate{"GD Perf Test String "};
-    const char* testStrVectorName{"GDPerformanceTestStrings"};
+//    const char* testStrVectorName{"GDPerformanceTestStrings"};
 
 /*
  * Private variables

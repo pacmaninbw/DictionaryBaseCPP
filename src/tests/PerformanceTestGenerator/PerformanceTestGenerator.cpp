@@ -107,24 +107,6 @@ bool PerformanceTestGenerator::generateEnum(std::size_t testSize) const noexcept
     return true;
 }
 
-bool PerformanceTestGenerator::generateEnumStringValues(std::size_t testSize) const noexcept
-{
-    std::cout << "static std::vector<std::string> " << testStrVectorName << testSize << " = \n{\n"
-        "\t\"\", // For " << firstEnum << "\n";
-    for (std::size_t lcount = MinEnumVal; lcount <= testSize; ++lcount)
-    {
-        std::cout << "\t\"" << testStrTemplate << lcount << "\",\n";
-    }
-    std::cout << "\t\"\" // For " << lastEnum << "\n};\n";
-    std::cout << std::flush;
-    if (!std::cout.flush())
-    {
-        return false;
-    }
-
-    return true;
-}
-
 std::string PerformanceTestGenerator::reconstructCommandLine() noexcept
 {
     std::string cmdLine(progName);
@@ -145,21 +127,31 @@ std::string PerformanceTestGenerator::reconstructCommandLine() noexcept
     return cmdLine;
 }
 
+void PerformanceTestGenerator::dataPairLineOut(std::size_t lineC, std::string tabPlusOpen, bool lastLine) const noexcept
+{
+    std::cout << tabPlusOpen << lineC << ", \"" << testStrTemplate << lineC << "\"}";
+    
+    if (!lastLine)
+    {
+        std::cout << ",";
+    }
+
+    std::cout << "\n";
+}
+
 bool PerformanceTestGenerator::genTestDataPairs(std::size_t testSize, std::size_t tabCount = 1) const noexcept
 {
     std::string tSize(std::to_string(testSize));
     std::string enumValue(enumName + std::to_string(testSize) + "::" + enumTemplate);
-    std::string strValue(testStrVectorName + tSize + "[");
-    auto tabPlusOpen = std::string(tabCount, '\t') + '{';
+    auto tabPlusOpen = std::string(tabCount, '\t') + '{' + enumValue;
 
     std::size_t lcount = MinEnumVal;
     for (; lcount < testSize ; ++lcount)
     {
-        std::cout << tabPlusOpen << enumValue << lcount << ", " << strValue <<
-            lcount << "]},\n";
+        dataPairLineOut(lcount, tabPlusOpen, false);
     }
-    std::cout << tabPlusOpen << enumValue << lcount << ", " << strValue <<
-            lcount << "]}\n";
+    dataPairLineOut(lcount, tabPlusOpen, true);
+
     std::cout << std::flush;
     if (!std::cout.flush())
     {
@@ -243,9 +235,6 @@ std::string PerformanceTestGenerator::generateAllTestDataAndTest(std::size_t tes
         << testSize << " enum values\n\n";
 
     if (!generateEnum(testSize)) return "";
-
-    std::cout << "\n";
-    if (!generateEnumStringValues(testSize)) return "";
 
     std::cout << "\n";
     if (!genTestDataPairsTable(testSize)) return "";
