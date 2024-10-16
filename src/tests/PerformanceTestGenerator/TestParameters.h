@@ -53,6 +53,7 @@ private:
     void printArgList() const noexcept;
     void printMoreUsageInfo() const noexcept;
     void getUserInput() noexcept;
+    void userInputFileName() noexcept;
     std::size_t safeUserNumericInput(std::string message, TestRange testRange);
     std::size_t safeNumericConversion(std::string userInput, TestRange testRange);
     bool hasRequiredArgument(std::size_t currentArg, ArgTypes argType) noexcept;

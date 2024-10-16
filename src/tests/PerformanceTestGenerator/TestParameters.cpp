@@ -154,6 +154,8 @@ void TestParameters::printMoreUsageInfo() const noexcept
 
 void TestParameters::getUserInput() noexcept
 {
+    userInputFileName();
+
     std::size_t tmpTestCount = 
         safeUserNumericInput("Enter the number of tests to generate",  countRange);
 
@@ -162,6 +164,25 @@ void TestParameters::getUserInput() noexcept
         testValues.push_back(
             safeUserNumericInput("Enter the number of enums to generate for this test", sizeRange)
         );
+    }
+}
+
+void TestParameters::userInputFileName() noexcept
+{
+    std::string inputStr;
+    do {
+        std::cout << "Generate output to the screen?[Yes/No]\n";
+        std::cin >> inputStr;
+        std::transform(inputStr.begin(), inputStr.end(), inputStr.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+    } while (inputStr[0] != 'y' && inputStr[0] != 'n');
+
+    if (inputStr[0] == 'n')
+    {
+        std::cout << "Enter the file name to save the output to\n";
+        std::cin >> inputStr;
+        useCout = false;
+        outPutFile = inputStr;
     }
 }
 
@@ -193,7 +214,8 @@ std::size_t TestParameters::safeNumericConversion(std::string userInput, TestRan
     }
     catch (std::out_of_range& e)
     {
-        std::cerr << "Value out of range in safeNumericConversion " << e.what() << "\n";
+        std::cerr << "Value out of range in safeNumericConversion [" 
+            << testRange.min << ", " << testRange.max << "] " << e.what() << "\n";
         return 0;
     }
 }
