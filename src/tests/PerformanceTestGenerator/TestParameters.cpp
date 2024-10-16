@@ -154,10 +154,10 @@ void TestParameters::printMoreUsageInfo() const noexcept
 
 void TestParameters::getUserInput() noexcept
 {
-    std::size_t testCount = 
+    std::size_t tmpTestCount = 
         safeUserNumericInput("Enter the number of tests to generate",  countRange);
 
-    for (std::size_t lcount = 0; lcount < testCount; ++lcount)
+    for (std::size_t lcount = 0; lcount < tmpTestCount; ++lcount)
     {
         testValues.push_back(
             safeUserNumericInput("Enter the number of enums to generate for this test", sizeRange)
@@ -186,12 +186,14 @@ std::size_t TestParameters::safeNumericConversion(std::string userInput, TestRan
         std::size_t safeNumber = static_cast<std::size_t>(std::stoi(userInput, nullptr, 16));
         return ((safeNumber >= testRange.min && safeNumber <= testRange.max)? safeNumber : 0);
     }
-    catch(std::invalid_argument& e)
+    catch (std::invalid_argument& e)
     {
+        std::cerr << "Non-integer value in safeNumericConversion " << e.what() << "\n";
         return 0;
     }
     catch (std::out_of_range& e)
     {
+        std::cerr << "Value out of range in safeNumericConversion " << e.what() << "\n";
         return 0;
     }
 }
