@@ -12,6 +12,10 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+cmake.db
+v17
+CMake Overview
+FileContentIndex
 
 # Old files that shouldn't be used
 ZOldNotUsed
