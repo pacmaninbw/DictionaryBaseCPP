@@ -35,7 +35,7 @@ TableIds TableDictionary::getId(std::string key) noexcept
     TableIds id = TableIds::NO_TABLE;
 
     auto definition = std::find_if(searchTable.begin(), searchTable.end(),
-        [&key](struct DictType &dicItem) {
+        [&key](DictType &dicItem) {
             return (dicItem.names.first == key ||
             dicItem.names.second == key);
         });
