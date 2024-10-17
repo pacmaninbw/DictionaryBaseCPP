@@ -48,3 +48,6 @@ The master branch contains corrections from both code review.
 # Todo Items
  - Add performance tests that test different containers in the GenericDictionary (std::vector versus std::map)
  - Integrate the generated performance tests into the unit testing.
+ - Add a default constructor.
+ - Add a constructor that takes only the wraping enum values.
+ - Allow data to be added at run time.
