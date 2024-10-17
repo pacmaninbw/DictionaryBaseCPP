@@ -163,11 +163,8 @@ bool PerformanceTestGenerator::genTestDataPairs(std::size_t testSize, std::size_
 
 bool PerformanceTestGenerator::genTestDataPairsTable(std::size_t testSize) const noexcept
 {
-    std::string tpVecName("testData");
-    tpVecName += std::to_string(testSize);
-
     std::cout << "\nstatic std::vector<TestPairs<" << enumName + std::to_string(testSize) <<
-        ">> " << tpVecName << " =\n{\n";
+        ">> " << testDataName << std::to_string(testSize) << " =\n{\n";
     if (!genTestDataPairs(testSize))
     {
         return false;
@@ -183,10 +180,10 @@ bool PerformanceTestGenerator::genTestDataPairsTable(std::size_t testSize) const
     return true;
 }
 
-std::string PerformanceTestGenerator::genTestFunc(std::size_t testSize) const noexcept
+std::string PerformanceTestGenerator::genTestFunc(std::size_t testSize, bool useVector) const noexcept
 {
     std::string enumBase(enumName + std::to_string(testSize));
-    std::string testName("performanceTest" + std::to_string(testSize));
+    std::string testName("performanceTest" + std::to_string(testSize) + (useVector? "Vector" : "ListInit"));
 
     std::cout << "static bool " << testName << "()\n{\n" <<
         "\tbool testPassed = true;\n\tUtilityTimer testTimer;\n\n\tstd::string testName(\"" <<
@@ -198,14 +195,23 @@ std::string PerformanceTestGenerator::genTestFunc(std::size_t testSize) const no
     enumBase += "::";
 
     std::cout << "\t\t\t" << enumBase << firstEnum << ",\n"
-        "\t\t\t" << enumBase << lastEnum << ",\n\t\t\t{\n";
+        "\t\t\t" << enumBase << lastEnum << ",";
 
-    if (!genTestDataPairs(testSize, 4))
+    if (useVector)
     {
-        return "";
+        std::cout << testDataName << std::to_string(testSize);
+    }
+    else
+    {
+        std::cout << "\n\t\t\t{\n";
+        if (!genTestDataPairs(testSize, 4))
+        {
+            return "";
+        }
+        std::cout << "\t\t\t}";
     }
 
-    std::cout << "\t\t\t}\n\t\t);\n\t\ttestTimer.stopTimerAndReport(\"Performance Test Constructor \" + testName + \" \");\n\n\t\t" <<
+    std::cout << "\n\t\t);\n\t\ttestTimer.stopTimerAndReport(\"Performance Test Constructor \" + testName + \" \");\n\n\t\t" <<
         "testPassed = performanceExecution<" << enumName + std::to_string(testSize)  <<
         ">(underTest, testData" << testSize << ", testName);\n"
         "\n\t}\n"
@@ -228,33 +234,48 @@ std::string PerformanceTestGenerator::genTestFunc(std::size_t testSize) const no
     return testName;
 }
 
-std::string PerformanceTestGenerator::generateAllTestDataAndTest(std::size_t testSize) const noexcept
+bool PerformanceTestGenerator::generateAllTestDataAndTest(std::size_t testSize) noexcept
 {
+    std::string currentTest;
+
     std::cout <<
         "// Generated GenericDictionary Performance Test Values for an enum class of "
         << testSize << " enum values\n\n";
 
-    if (!generateEnum(testSize)) return "";
+    if (!generateEnum(testSize)) return false;
 
     std::cout << "\n";
-    if (!genTestDataPairsTable(testSize)) return "";
+    if (!genTestDataPairsTable(testSize)) return false;
 
     std::cout << "\n";
-    return genTestFunc(testSize);
+    if ((currentTest = genTestFunc(testSize, false)).length() > 0)
+    {
+        testNames.push_back(currentTest);
+    }
+    else
+    {
+        return false;
+    }
+
+// since we are testing using the previously generated test data, just a simple test
+    std::cout << "\n";
+    if ((currentTest = genTestFunc(testSize, true)).length() > 0)
+    {
+        testNames.push_back(currentTest);
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
 }
 
-bool PerformanceTestGenerator::genPerformanceTest() const noexcept
+bool PerformanceTestGenerator::genPerformanceTest() noexcept
 {
-    std::vector<std::string> testNames;
-
     for (auto testSize: testValues)
     {
-        std::string testName(generateAllTestDataAndTest(testSize));
-        if (testName.length() > 0)
-        {
-            testNames.push_back(testName);
-        }
-        else
+        if (!generateAllTestDataAndTest(testSize))
         {
             return false;
         }

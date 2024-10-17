@@ -17,9 +17,9 @@ private:
     void dataPairLineOut(std::size_t lineC, std::string tabPlusOpen, bool lastLine) const noexcept;
     bool genTestDataPairs(std::size_t testSize, std::size_t tabCount) const noexcept;
     bool genTestDataPairsTable(std::size_t testSize) const noexcept;
-    std::string genTestFunc(std::size_t testSize) const noexcept;
-    std::string generateAllTestDataAndTest(std::size_t testSize) const noexcept;
-    bool genPerformanceTest() const noexcept;
+    std::string genTestFunc(std::size_t testSize, bool useVector) const noexcept;
+    bool generateAllTestDataAndTest(std::size_t testSize) noexcept;
+    bool genPerformanceTest() noexcept;
     bool generateEnumValues(std::size_t testSize) const noexcept;
     bool generateEnum(std::size_t testSize) const noexcept;
     std::string reconstructCommandLine() noexcept;
@@ -37,6 +37,7 @@ private:
     const char* enumName{"GDPerformanceTestEnum"};
     const char* firstEnum{"GD_Perf_Test_Invalid_enum_Value"};
     const char* lastEnum{"GD_Perf_Test_Last_Enum"};
+    const char* testDataName{"testData"};
 /*
  * The following constant are for testing the strings associated with the enums.
  */
@@ -49,6 +50,7 @@ private:
     std::vector<std::size_t> testValues;    // Each item in in the vector is a test size to generate.
     std::string progName;
     std::string version;
+    std::vector<std::string> testNames;
     bool useCout = true;
     std::string outPutFileName;
     std::ofstream outPutFile;
