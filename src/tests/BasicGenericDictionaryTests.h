@@ -53,12 +53,7 @@ static bool testNameToID(
     return true;
 }
 
-template <typename  enumDictType>
-struct TestPairs
-{
-	enumDictType testID;
-	std::string testName;
-};
+template <typename  enumDictType> using TestPairs = GenricDictionaryDataPair<enumDictType, std::string>;
 
 template <typename enumDictType>
 static bool testIDtoNameLoop(
@@ -71,8 +66,8 @@ static bool testIDtoNameLoop(
 
     for (auto test: TestData)
     {
-        enumDictType testId = test.testID;
-        std::string expectedOutPut = test.testName;
+        enumDictType testId = test.id;
+        std::string expectedOutPut = test.names;
         std::string testGetName = underTest.getNames(testId);
         if (testGetName.compare(expectedOutPut) != 0)
         {
@@ -101,8 +96,8 @@ static bool testNametoIDLoop(
 
     for (auto test: TestData)
     {
-        std::string testName = TestData.testName;
-        enumDictType expectedOutput = TestData.testId;
+        std::string testName = TestData.names;
+        enumDictType expectedOutput = TestData.id;
         enumDictType testGetID = underTest.getIds(testName);
         if (testGetID != expectedOutput)
         {
@@ -145,7 +140,7 @@ static bool testMinMaxMiddleValues(
         auto tDp = testData[tIndex];
         std::string testReport = "Performance Test find string from [" + std::to_string(tIndex) + "] ID " + testName + " ";
         testTimer.startTimer();
-        allTestsPassed = testIdToName<enumDictType>(underTest, tDp.testID, tDp.testName, testName + " testIDToName()");
+        allTestsPassed = testIdToName<enumDictType>(underTest, tDp.id, tDp.names, testName + " testIDToName()");
         testTimer.stopTimerAndReport(testReport);
         if (!allTestsPassed)
         {
@@ -158,7 +153,7 @@ static bool testMinMaxMiddleValues(
         auto tDp = testData[tIndex];
         std::string testReport = "Performance Test find ID from [" + std::to_string(tIndex) + "] Name " + testName + " ";
         testTimer.startTimer();
-        allTestsPassed = testNameToID<enumDictType>(underTest, tDp.testName, tDp.testID, testName + " testNameToID()");
+        allTestsPassed = testNameToID<enumDictType>(underTest, tDp.names, tDp.id, testName + " testNameToID()");
         testTimer.stopTimerAndReport(testReport);
         if (!allTestsPassed)
         {
@@ -205,3 +200,4 @@ static bool performanceExecution(
 }
 
 #endif // BASICGENERICDICTIONARYTESTS_H_
+

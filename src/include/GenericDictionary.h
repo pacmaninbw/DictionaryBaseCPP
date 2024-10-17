@@ -2,8 +2,10 @@
 #define GENERICDICTIONARY_H_
 
 #include <algorithm>
+#include <concepts>
 #include <exception>
 #include <iostream>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -30,14 +32,17 @@
  * 
  */
 template <typename dictID, typename dictName>
+struct GenricDictionaryDataPair
+{
+    dictID id;
+    dictName names;
+};
+
+template <typename dictID, typename dictName>
 class GenericDictionary
 {
 public:
-    struct DictType
-    {
-        dictID id;
-        dictName names;
-    };
+    using DictType = GenricDictionaryDataPair<dictID, dictName>;
 
 // Both the MinValue and MaxValue should be invalid values
 // Example
@@ -47,16 +52,15 @@ public:
     MaximumValue{MaxValue},
     searchTable{definitions}
     {
-        constructorMissingIDSizeTest();
-        
-        // To improve performance when searhing by id sort by id.
-        // This sort is only necessary if the underlying structure remains
-        // defIter1 vector. If it is std::map() the sort is not necessary.
-        std::sort(searchTable.begin(), searchTable.end(),
-            [](DictType defIter1, DictType defIter2) {return  defIter1.id < defIter2.id;});
+        commonConstructrCode();
+    }
 
-        // Check for any missing or duplicate definitions now that the data is sorted.
-        testForNoneLinearDefinitions();
+    GenericDictionary(dictID MinValue, dictID MaxValue, std::vector<DictType> definitions)
+    : MinimumValue{MinValue},
+    MaximumValue{MaxValue},
+    searchTable{definitions}
+    {
+        commonConstructrCode();
     }
 
     virtual ~GenericDictionary() = default;
@@ -64,7 +68,7 @@ public:
     virtual dictID getIds(dictName itemName) noexcept
     {
         auto definition = std::find_if(searchTable.begin(), searchTable.end(),
-            [&itemName](struct DictType &dicItem) {return (dicItem.names == itemName);});
+            [&itemName](DictType &dicItem) {return (dicItem.names == itemName);});
 
         if (definition != searchTable.end())
         {
@@ -102,6 +106,20 @@ public:
     }
 
 protected:
+    void commonConstructrCode()
+    {
+        constructorMissingIDSizeTest();
+        
+        // To improve performance when searhing by id sort by id.
+        // This sort is only necessary if the underlying structure remains
+        // defIter1 vector. If it is std::map() the sort is not necessary.
+        std::sort(searchTable.begin(), searchTable.end(),
+            [](DictType defIter1, DictType defIter2) {return  defIter1.id < defIter2.id;});
+
+        // Check for any missing or duplicate definitions now that the data is sorted.
+        testForNoneLinearDefinitions();
+    }
+
 /*
  * If the enum was constructed correctly, there are 2 enums defined that do not
  * have associated strings, the first enum, that has defIter1 zero value and the last
