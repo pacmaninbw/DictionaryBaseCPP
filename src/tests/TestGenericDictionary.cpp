@@ -6,6 +6,7 @@
 #include "TestGenericDictionary.h"
 #include "UtilityTimer.h"
 #include <vector>
+#include "BasicGenericDictionaryTests.h"
 
 TestGenericDictionary::TestGenericDictionary()
 {
@@ -88,7 +89,7 @@ static std::vector<std::string> positiveGDTestStrings =
     "" // For GDPOSITIVE_LAST_ENUM
 };
 
-static std::vector<TestPairs> testData =
+static std::vector<TestPairs<GDPositivePathEnum>> testData =
 {
     {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_1, positiveGDTestStrings[1]},
     {GDPositivePathEnum::GDPOSITIVE_TEST_VALUE_2, positiveGDTestStrings[2]},
@@ -125,10 +126,9 @@ bool TestGenericDictionary::testContructorPositivePath() noexcept
         );
         
         std::cout << "\tTest GenericDictionary Constructor Positive Path No exception thrown PASSED\n";
-
-        if ((testPassed = testIdToNameLoop(underTest, testData)))
+        if ((testPassed = testIDtoNameLoop<GDPositivePathEnum>(underTest, testData, "testContructorPositivePath::testIDtoNameLoop()")))
         {
-            testPassed = testNameToIDLoop(underTest, testData);
+            testPassed = testNametoIDLoop<GDPositivePathEnum>(underTest, testData,"testContructorPositivePath::testNametoIDLoop");
         }
     }
     catch (const std::logic_error &le)
@@ -267,78 +267,5 @@ bool TestGenericDictionary::testConstructorDuplicateName() noexcept
     return false;
 }
 
-bool TestGenericDictionary::testIdToName(
-    GenericDictionary<GDPositivePathEnum, std::string> &underTest,
-    GDPositivePathEnum testId, 
-    std::string &expectedOutput
-) noexcept
-{
-    std::string testGetName = underTest.getNames(testId);
-    if (testGetName.compare(expectedOutput) != 0)
-    {
-        std::cerr
-            << "\tTest GenericDictionary get Name from ID FAILED: Input Value " <<
-            static_cast<std::size_t>(testId)
-            << " Expected Output " << expectedOutput << " " 
-            << " Actual Ouput " << testGetName << "\n";
-            ;
-        return false;
-    }
 
-    return true;
-}
-
-bool TestGenericDictionary::testIdToNameLoop(
-    GenericDictionary<GDPositivePathEnum, std::string> &underTest,
-    std::vector<TestPairs> &testData
-) noexcept
-{
-    for (auto testInput: testData)
-    {
-        if (!testIdToName(underTest, testInput.testID, testInput.testName))
-        {
-            return false;
-        }
-    }
-    
-    std::cout << "\tTest GenericDictionary get Name from ID PASSED\n";
-
-    return true;
-}
-
-bool TestGenericDictionary::testNameToId(
-    GenericDictionary<GDPositivePathEnum, std::string> &underTest,
-    std::string testName,
-    GDPositivePathEnum expectedOutput
-) noexcept
-{
-    GDPositivePathEnum testGetID = underTest.getIds(testName);
-    if (testGetID != expectedOutput)
-    {
-        std::cerr <<
-            "\tTest GenericDictionary get ID from Name FAILED: "
-            << "Input Name: " << testName
-            << " Expected Output: " << static_cast<std::size_t>(expectedOutput)
-            << " Actual Output: " << static_cast<std::size_t>(testGetID)
-            << "\n";
-        return false;
-    }
-
-    return true;
-}
-
-bool TestGenericDictionary::testNameToIDLoop(GenericDictionary<GDPositivePathEnum, std::string> &underTest, std::vector<TestPairs> &testData) noexcept
-{
-    for (auto testInput: testData)
-    {
-        if (!testNameToId(underTest,  testInput.testName, testInput.testID))
-        {
-            return false;
-        }
-    }
-    
-    std::cout << "\tTest GenericDictionary get ID from Name PASSED\n";
-
-    return true;
-}
 

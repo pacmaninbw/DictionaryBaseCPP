@@ -2,8 +2,6 @@
 #define TESTGENERICDICTIONARY_H
 
 #include "../include/GenericDictionary.h"
-#include <string>
-
 /*
  * GD for GenericDictionary
  */
@@ -19,12 +17,6 @@ enum class GDPositivePathEnum
     GDPOSITIVE_LAST_ENUM
 };
 
-struct TestPairs
-{
-    GDPositivePathEnum testID;
-    std::string testName;
-};
-
 class TestGenericDictionary
 {
 public:
@@ -37,15 +29,6 @@ private:
     bool testConstructorMissingIDDef() noexcept;
     bool testConstructorDuplicateID() noexcept;
     bool testConstructorDuplicateName() noexcept;
-    bool testIdToName(GenericDictionary<GDPositivePathEnum, std::string> &underTest,
-        GDPositivePathEnum testId, std::string &expectedOutput) noexcept;
-    bool testIdToNameLoop(GenericDictionary<GDPositivePathEnum, std::string> &underTest,
-        std::vector<TestPairs> &testData) noexcept;
-    bool testNameToId(GenericDictionary<GDPositivePathEnum, std::string> &underTest,
-        std::string testName, GDPositivePathEnum expectedOutput) noexcept;
-    bool testNameToIDLoop(GenericDictionary<GDPositivePathEnum, std::string> &underTest,
-        std::vector<TestPairs> &testData) noexcept;
-
 };
 
 #endif // TESTGENERICDICTIONARY_H
