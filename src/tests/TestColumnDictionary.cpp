@@ -1,7 +1,7 @@
 #include <iostream>
 #include "ColumnDictionary.h"
 #include "TestColumnDictionary.h"
-#include "UtilityTimer.h"
+#include "../include/UtilityTimer.h"
 
 /*
  * Testing the ColumnDictionary class, which just uses the base class.

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "TableDictionary.h"
 #include "TestTableDictionary.h"
-#include "UtilityTimer.h"
+#include "../include/UtilityTimer.h"
 
 /*
  * Testing TableDictionary class which adds some extenstions to the base clase.

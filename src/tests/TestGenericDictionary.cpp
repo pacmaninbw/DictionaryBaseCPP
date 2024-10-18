@@ -1,12 +1,11 @@
+#define GD_PERFORMANCE_TEST
 #include <exception>
 #include "../include/GenericDictionary.h"
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include "TestGenericDictionary.h"
-#include "UtilityTimer.h"
 #include <vector>
-#include "BasicGenericDictionaryTests.h"
 
 TestGenericDictionary::TestGenericDictionary()
 {
