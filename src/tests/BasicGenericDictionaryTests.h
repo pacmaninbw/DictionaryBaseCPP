@@ -58,7 +58,7 @@ template <typename  enumDictType> using TestPairs = GenricDictionaryDataPair<enu
 template <typename enumDictType>
 static bool testIDtoNameLoop(
     GenericDictionary <enumDictType, std::string>& underTest,
-    std::vector<TestPairs<enumDictType>>& TestData,
+    std::vector<GenricDictionaryDataPair<enumDictType, std::string>>& TestData,
     std::string errorMessage
 )
 {
@@ -88,16 +88,16 @@ static bool testIDtoNameLoop(
 template <typename enumDictType>
 static bool testNametoIDLoop(
     GenericDictionary <enumDictType, std::string>& underTest,
-    std::vector<TestPairs<enumDictType>>& TestData,
+    std::vector<GenricDictionaryDataPair<enumDictType, std::string>>& localTestData,
     std::string errorMessage
 )
 {
     bool allTestsPassed = true;
 
-    for (auto test: TestData)
+    for (auto test: localTestData)
     {
-        std::string testName = TestData.names;
-        enumDictType expectedOutput = TestData.id;
+        std::string testName = test.names;
+        enumDictType expectedOutput = test.id;
         enumDictType testGetID = underTest.getIds(testName);
         if (testGetID != expectedOutput)
         {
@@ -189,7 +189,7 @@ static bool performanceExecution(
     }
 
     testTimer.startTimer();
-    testIDtoNameLoop<enumDictType>(underTest, testData, testName + " testIDtoNameLoop()");
+    testNametoIDLoop<enumDictType>(underTest, testData, testName + " testNametoIDLoop()");
     testTimer.stopTimerAndReport("Performance Loop Test find ID from Name " + testName + " ");
     if (!allTestsPassed)
     {
