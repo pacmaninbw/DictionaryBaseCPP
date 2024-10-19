@@ -11,7 +11,7 @@ target_compile_features(createPerformanceTest PUBLIC cxx_std_20)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     # warning level 4 and all warnings as errors
-    target_compile_options(createPerformanceTest PRIVATE /W4 /WX -D_CRT_SECURE_NO_WARNINGS)
+    target_compile_options(createPerformanceTest PRIVATE /W3 /WX -D_CRT_SECURE_NO_WARNINGS)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # require at least gcc 12 to get full C++20 support
