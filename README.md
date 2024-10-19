@@ -51,4 +51,3 @@ The master branch contains corrections from both code review.
  - Add a default constructor.
  - Add a constructor that takes only the wraping enum values.
  - Allow data to be added at run time.
- - Move unit testing for GenericDictionary into the main include file instead of a separate header file.
