@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "../UtilityTimer.h"
+#include "../../include/UtilityTimer.h"
 #include "PerformanceTestGenerator.h"
 
 PerformanceTestGenerator::PerformanceTestGenerator(TestParameters testParameters)
@@ -43,10 +43,9 @@ bool PerformanceTestGenerator::generateAllPerformaneTests() noexcept
     std::cout << "\n// The command line to reproduce this file is \n";
     std::cout << "//     " << reconstructCommandLine();
     std::cout << "\n\n";
+    std::cout << "#define GD_PERFORMANCE_TEST\n";
     std::cout << "#include \"../../include/GenericDictionary.h\"\n";
-    std::cout << "#include \"../BasicGenericDictionaryTests.h\"\n";
     std::cout << "#include <string>\n";
-    std::cout << "#include \"../UtilityTimer.h\"\n";
     std::cout << "#include <vector>\n\n\n";
 
     std::cout << std::flush;
